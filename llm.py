@@ -1,21 +1,21 @@
-import os
-import requests
-from dotenv import load_dotenv
-
-load_dotenv()
-API_KEY = os.getenv("GROK_API_KEY")
-BASE_URL = "https://api.x.ai/v1/chat/completions"
+import re
 
 def process_input(user_id: str, input_text: str, is_query: bool = False):
-    prompt = f"{'Optimize this query' if is_query else 'Refine this input'} for a personal vector database for user {user_id}: {input_text}"
-    payload = {
-        "model": "grok-4",
-        "messages": [
-            {"role": "system", "content": "You are an intermediary for a personal vector database. Refine inputs for storage or optimize queries for retrieval, ensuring clarity and relevance."},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.7
-    }
-    response = requests.post(BASE_URL, headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}, json=payload)
-    response.raise_for_status()
-    return response.json()["choices"][0]["message"]["content"]
+    """
+    Process input text for database storage/query.
+    For now, using simple text cleaning instead of LLM to avoid timeouts.
+    """
+    # Simple text cleaning and normalization
+    cleaned = input_text.strip()
+
+    # Remove extra whitespace
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+
+    # Basic keyword extraction for queries (keep important terms)
+    if is_query:
+        # Remove common stop words and keep meaningful terms
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'shall'}
+        words = cleaned.lower().split()
+        cleaned = ' '.join(word for word in words if word not in stop_words and len(word) > 2)
+
+    return cleaned
