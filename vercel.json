@@ -1,6 +1,7 @@
 {
-    "rewrites": [
-      {"source": "/api/(.*)", "destination": "/web.py"},
-      {"source": "/(.*)", "destination": "/frontend/index.html"}
-    ]
-  }
+  "rewrites": [
+    {"source": "/api/(.*)", "destination": "/web.py"},
+    {"source": "/(.*)", "destination": "/frontend/index.html"}
+  ],
+  "framework": null
+}
