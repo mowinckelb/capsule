@@ -1,7 +1,10 @@
 {
-  "rewrites": [
-    {"source": "/api/(.*)", "destination": "/web.py"},
-    {"source": "/(.*)", "destination": "/frontend/index.html"}
+  "version": 2,
+  "builds": [
+    {"src": "web.py", "use": "@vercel/python"}
   ],
-  "framework": null
+  "routes": [
+    {"src": "/api/(.*)", "dest": "/web.py"},
+    {"src": "/(.*)", "dest": "/frontend/index.html"}
+  ]
 }
