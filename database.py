@@ -18,11 +18,11 @@ def get_user_collection(user_id: str):
 
 def add_memory(user_id: str, memory: str):
     index = get_user_collection(user_id)
-    vector = [0.0] * 1536
+    vector = [0.0] * 1536  # Placeholder; replace with actual embedding in production
     index.upsert(vectors=[(f"id_{user_id}_{index.stats()['total_vector_count']}", vector, {"user_id": user_id, "memory": memory})])
 
 def query_memories(user_id: str, query_text: str):
     index = get_user_collection(user_id)
-    query_vector = [0.0] * 1536
+    query_vector = [0.0] * 1536  # Placeholder; replace with actual embedding
     results = index.query(vector=query_vector, top_k=5, filter={"user_id": user_id})
     return [match["metadata"]["memory"] for match in results["matches"]]
