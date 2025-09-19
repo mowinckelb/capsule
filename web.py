@@ -1,11 +1,15 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from database import add_memory, query_memories
 from llm import process_input
 import sqlite3
+import uvicorn
+import os
 
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -52,3 +56,14 @@ async def query(q: str, user: dict = Depends(get_current_user)):
     refined_query = process_input(user_id, q, is_query=True)
     results = query_memories(user_id, refined_query)
     return {"results": results}
+
+@app.post("/upload")
+async def upload(mcp_data: dict, user: dict = Depends(get_current_user)):
+    user_id = user["user_id"]
+    data_str = str(mcp_data)
+    refined_data = process_input(user_id, data_str, is_query=False)
+    add_memory(user_id, refined_data)
+    return {"status": "uploaded"}
+
+if __name__ == "__main__":
+    uvicorn.run("app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=False)
