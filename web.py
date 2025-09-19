@@ -5,8 +5,6 @@ from passlib.context import CryptContext
 from database import add_memory, query_memories
 from llm import process_input
 import sqlite3
-import uvicorn
-import os
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -66,4 +64,6 @@ async def upload(mcp_data: dict, user: dict = Depends(get_current_user)):
     return {"status": "uploaded"}
 
 if __name__ == "__main__":
+    import uvicorn
+    import os
     uvicorn.run("app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=False)

@@ -6,8 +6,5 @@
   "routes": [
     {"src": "/api/(.*)", "dest": "/web.py"},
     {"src": "/(.*)", "dest": "/frontend/index.html"}
-  ],
-  "env": {
-    "PYTHONPATH": "./"
-  }
+  ]
 }

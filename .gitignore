@@ -7,5 +7,3 @@ venv/
 data_*/
 users.db
 .pytest_cache/
-*.sqlite3
-*.bin

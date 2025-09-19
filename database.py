@@ -1,21 +1,18 @@
-import sqlite3
+import chromadb
 
-def get_user_connection(user_id: str):
-    conn = sqlite3.connect(f"memories_{user_id}.db")
-    cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS memories (id INTEGER PRIMARY KEY AUTOINCREMENT, memory TEXT)")
-    conn.commit()
-    return conn, cursor
+def get_user_collection(user_id: str):
+    client = chromadb.PersistentClient(path=f"./data_{user_id}")
+    return client.get_or_create_collection("memories")
 
 def add_memory(user_id: str, memory: str):
-    conn, cursor = get_user_connection(user_id)
-    cursor.execute("INSERT INTO memories (memory) VALUES (?)", (memory,))
-    conn.commit()
-    conn.close()
+    get_user_collection(user_id).add(
+        documents=[memory],
+        metadatas=[{"user_id": user_id}],
+        ids=[f"id_{len(get_user_collection(user_id).get()['ids'])}"]
+    )
 
 def query_memories(user_id: str, query_text: str):
-    conn, cursor = get_user_connection(user_id)
-    cursor.execute("SELECT memory FROM memories WHERE memory LIKE ?", ('%' + query_text + '%',))
-    results = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return results
+    return get_user_collection(user_id).query(
+        query_texts=[query_text],
+        n_results=5
+    )["documents"]
