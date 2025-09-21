@@ -66,7 +66,7 @@ def chat_with_llm():
             refined = process_input(user_id, query, is_query=True)
             results = query_memories(user_id, refined)
             if results:
-                summary_prompt = f"For user {user_id}, respond to '{query}' in concise, natural language using only: {results}."
+                summary_prompt = f"For user {user_id}, respond to '{query}' in concise, natural language using only the information in these memories: {results}. Do not add or assume details not present."
                 response = process_input(user_id, summary_prompt, is_query=False)
                 print(response)
             else:
