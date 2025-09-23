@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Form
+from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
@@ -10,6 +11,7 @@ import os
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
