@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    {"src": "web.py", "use": "@render/python"},
+    {"src": "frontend/*.html", "use": "@render/static"}
+  ],
+  "routes": [
+    {"src": "/api/(.*)", "dest": "/web.py"},
+    {"src": "/(.*)", "dest": "/frontend/index.html"}
+  ],
+  "env": {
+    "PYTHONPATH": "./"
+  }
+}
