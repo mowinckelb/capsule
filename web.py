@@ -6,8 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from database import DBHandler
 from llm import LLMHandler
-from sqlalchemy import create_engine, Column, String
-from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
+from sqlalchemy import create_engine, Column, String # type: ignore
+from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase # type: ignore
 from typing import Dict, Generator
 import uvicorn
 import os
