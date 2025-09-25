@@ -73,7 +73,7 @@ async def query(q: str, user: dict = Depends(get_current_user)):
     refined_query = handler.process_input(user_id, q, is_query=True)
     results = db.query_memories(user_id, refined_query)
     if results:
-        summary_prompt = f"Respond to '{q}' in one short sentence, using only: {results}. Avoid metadata or formatting."
+        summary_prompt = f"Respond to '{q}' in natural language, using only: {results}. Avoid metadata or formatting."
         response = handler.process_input(user_id, summary_prompt, is_query=False)
         return {"results": response}
     return {"results": "No matching memories found."}
