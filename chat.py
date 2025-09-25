@@ -1,9 +1,13 @@
 import sqlite3
-from llm import process_input
-from database import add_memory, query_memories
+from llm import LLMHandler
+from database import DBHandler
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+handler = LLMHandler()
+
+db = DBHandler()
 
 conn = sqlite3.connect("users.db")
 cursor = conn.cursor()
@@ -58,16 +62,16 @@ def chat_with_llm():
             break
         if user_input.lower().startswith("input:"):
             memory = user_input[6:].strip()
-            refined = process_input(user_id, memory, is_query=False)
-            add_memory(user_id, refined)
+            refined = handler.process_input(user_id, memory, is_query=False)
+            db.add_memory(user_id, refined)
             print("Memory saved successfully!")
         elif user_input.lower().startswith("output:"):
             query = user_input[7:].strip()
-            refined = process_input(user_id, query, is_query=True)
-            results = query_memories(user_id, refined)
+            refined = handler.process_input(user_id, query, is_query=True)
+            results = db.query_memories(user_id, refined)
             if results:
                 summary_prompt = f"For user {user_id}, respond to '{query}' in concise, natural language using only the information in these memories: {results}. Do not add or assume details not present."
-                response = process_input(user_id, summary_prompt, is_query=False)
+                response = handler.process_input(user_id, summary_prompt, is_query=False)
                 print(response)
             else:
                 print("No matching memories found.")

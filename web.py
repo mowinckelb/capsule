@@ -4,11 +4,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
-from database import add_memory, query_memories
-from llm import process_input
+from database import DBHandler
+from llm import LLMHandler
 import sqlite3
 import uvicorn
 import os
+
+handler = LLMHandler()
+
+db = DBHandler()
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -56,8 +60,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 async def add(memory: str = Form(), user: dict = Depends(get_current_user)):
     try:
         user_id = user["user_id"]
-        refined_memory = process_input(user_id, memory, is_query=False)
-        add_memory(user_id, refined_memory)
+        refined_memory = handler.process_input(user_id, memory, is_query=False)
+        db.add_memory(user_id, refined_memory)
         return {"status": "added"}
     except Exception as e:
         print(f"Error in /add: {str(e)}")
@@ -66,11 +70,11 @@ async def add(memory: str = Form(), user: dict = Depends(get_current_user)):
 @app.get("/query")
 async def query(q: str, user: dict = Depends(get_current_user)):
     user_id = user["user_id"]
-    refined_query = process_input(user_id, q, is_query=True)
-    results = query_memories(user_id, refined_query)
+    refined_query = handler.process_input(user_id, q, is_query=True)
+    results = db.query_memories(user_id, refined_query)
     if results:
         summary_prompt = f"Respond to '{q}' in one short sentence, using only: {results}. Avoid metadata or formatting."
-        response = process_input(user_id, summary_prompt, is_query=False)
+        response = handler.process_input(user_id, summary_prompt, is_query=False)
         return {"results": response}
     return {"results": "No matching memories found."}
 
@@ -78,8 +82,8 @@ async def query(q: str, user: dict = Depends(get_current_user)):
 async def upload(mcp_data: dict, user: dict = Depends(get_current_user)):
     user_id = user["user_id"]
     data_str = str(mcp_data)
-    refined_data = process_input(user_id, data_str, is_query=False)
-    add_memory(user_id, refined_data)
+    refined_data = handler.process_input(user_id, data_str, is_query=False)
+    db.add_memory(user_id, refined_data)
     return {"status": "uploaded"}
 
 @app.get("/{full_path:path}", include_in_schema=False)
