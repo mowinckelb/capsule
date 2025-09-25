@@ -19,17 +19,17 @@ class LLMHandler:
             self.api_key = api_key
             self.base_url = provider_config['base_url']
             self.model = provider_config['model']
-            self.system_prompt = provider_config['system_prompt']
+            self.system_prompt = provider_config.get('system_prompt', '') + " Handle MCP multi-modal input (text/image via tools)."
         else:
             # TODO: Add new provider setup here, e.g., elif provider == 'anthropic': self.client = Anthropic(os.getenv(provider_config['api_key_env']))
             raise NotImplementedError(f"Provider '{provider}' not implemented yet—add in __init__ using provider_config")
 
-    def process_input(self, user_id: str, input_text: str | Dict[str, Any], is_query: bool = False) -> str:
+    def process_input(self, user_id: str, input_text: str | Dict[str, Any], is_query: bool = False, db_provider: str = None) -> str:
         # Parse input: str or MCP dict (future-ready)
         content = input_text if isinstance(input_text, str) else input_text.get('messages', [{}])[-1].get('content', str(input_text))
         
         if self.provider == 'grok':
-            prompt = f"{'Optimize this query' if is_query else 'Refine this input'} for a personal vector database for user {user_id}: {content}"
+            prompt = f"{'Optimize this query' if is_query else 'Refine this input'} for {db_provider or 'abstracted'} storage in user {user_id}'s sovereign DB: {content}"
             payload = {
                 "model": self.model,
                 "messages": [
