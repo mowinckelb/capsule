@@ -27,6 +27,9 @@ class User(Base):
     user_id = Column(String, primary_key=True)
     hashed_password = Column(String, nullable=False)
 
+def create_tables() -> None:
+    Base.metadata.create_all(bind=engine)
+
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
@@ -35,7 +38,7 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 app = FastAPI()
-app.add_event_handler("startup", lambda: Base.metadata.create_all(bind=engine))
+app.add_event_handler("startup", create_tables)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
