@@ -36,11 +36,18 @@ class DBHandler:
         else:
             raise NotImplementedError(f"get_index not implemented for '{self.provider}'")
 
-    def add_memory(self, user_id: str, memory: str):
+    def add_memory(self, user_id: str, memory: str | dict):
         if self.provider == 'pinecone':
             index = self.get_index()
-            vector = self.model.encode(memory).tolist()
-            index.upsert(vectors=[(f"id_{user_id}_{uuid.uuid4()}", vector, {"memory": memory})], namespace=user_id)
+            if isinstance(memory, dict):
+                content = memory.get('content', memory)
+                vector = self.model.encode(content).tolist()
+                metadata = {'summary': memory.get('summary', ''), 'tags': memory.get('tags', [])}
+            else:
+                content = memory
+                vector = self.model.encode(memory).tolist()
+                metadata = {"memory": memory}
+            index.upsert(vectors=[(f"id_{user_id}_{uuid.uuid4()}", vector, metadata)], namespace=user_id)
         else:
             raise NotImplementedError(f"add_memory not implemented for '{self.provider}'")
 

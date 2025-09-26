@@ -1,6 +1,7 @@
 import os
 import requests
 from typing import Dict, Any
+import json
 from dotenv import load_dotenv
 from defaults import PROVIDERS, DEFAULT_PROVIDER
 
@@ -40,7 +41,12 @@ class LLMHandler:
             }
             response = requests.post(self.base_url, headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}, json=payload)
             response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"]
+            content = response.json()["choices"][0]["message"]["content"]
+            try:
+                parsed = json.loads(content)
+                return parsed
+            except json.JSONDecodeError:
+                return {'content': content, 'tags': [], 'summary': content}
         else:
             # TODO: Add new provider logic here, e.g., elif self.provider == 'anthropic': client.messages.create with tools
             raise NotImplementedError(f"Provider '{self.provider}' not implemented yet—add in process_input using provider_config")
