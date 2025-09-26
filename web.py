@@ -38,7 +38,7 @@ async def register(user_id: str = Form(), password: str = Form()):
     if cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User ID exists")
-    hashed_password = pwd_context.hash(password)
+    hashed_password = pwd_context.hash(password[:72])
     cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (?, ?)", (user_id, hashed_password))
     conn.commit()
     conn.close()

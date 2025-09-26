@@ -26,7 +26,7 @@ def register_user(user_id: str, password: str):
     cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
     if cursor.fetchone():
         return False
-    hashed_password = pwd_context.hash(password)
+    hashed_password = pwd_context.hash(password[:72])
     cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (?, ?)", (user_id, hashed_password))
     conn.commit()
     return True
