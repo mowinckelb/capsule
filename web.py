@@ -38,7 +38,7 @@ async def register(user_id: str = Form(), password: str = Form()):
     if cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User ID exists")
-    hashed_password = pwd_context.hash(password[:72])
+    hashed_password = pwd_context.hash(password.encode('utf-8')[:72].decode('utf-8', errors='ignore'))
     cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (?, ?)", (user_id, hashed_password))
     conn.commit()
     conn.close()
@@ -51,7 +51,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     cursor.execute("SELECT hashed_password FROM users WHERE user_id = ?", (form_data.username,))
     user = cursor.fetchone()
     conn.close()
-    if not user or not pwd_context.verify(form_data.password, user[0]):
+    if not user or not pwd_context.verify(form_data.password.encode('utf-8')[:72].decode('utf-8', errors='ignore'), user[0]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong password")
     return {"access_token": form_data.username, "token_type": "bearer"}
 
