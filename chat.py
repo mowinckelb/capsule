@@ -1,8 +1,7 @@
 from llm import LLMHandler
 from database import DBHandler
 from passlib.context import CryptContext
-from sqlalchemy import create_engine, Column, String # type: ignore
-from sqlalchemy.orm import sessionmaker, DeclarativeBase # type: ignore
+import sqlite3
 import os
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -11,44 +10,25 @@ handler = LLMHandler()
 
 db = DBHandler()
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///users.db")
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-class Base(DeclarativeBase):
-    pass
-
-class User(Base):
-    __tablename__ = "users"
-    user_id = Column(String, primary_key=True)
-    hashed_password = Column(String, nullable=False)
-
-Base.metadata.create_all(bind=engine)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+conn = sqlite3.connect("users.db")
+cursor = conn.cursor()
+cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, hashed_password TEXT)")
+conn.commit()
 
 def authenticate_user(user_id: str, password: str):
-    db = next(get_db())
-    user = db.query(User).filter(User.user_id == user_id).first()
-    db.close()
-    if not user or not pwd_context.verify(password, user.hashed_password):
+    cursor.execute("SELECT hashed_password FROM users WHERE user_id = ?", (user_id,))
+    user = cursor.fetchone()
+    if not user or not pwd_context.verify(password, user[0]):
         return False
     return True
 
 def register_user(user_id: str, password: str):
-    db = next(get_db())
-    existing = db.query(User).filter(User.user_id == user_id).first()
-    if existing:
-        db.close()
+    cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
+    if cursor.fetchone():
         return False
-    new_user = User(user_id=user_id, hashed_password=pwd_context.hash(password))
-    db.add(new_user)
-    db.commit()
-    db.close()
+    hashed_password = pwd_context.hash(password)
+    cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (?, ?)", (user_id, hashed_password))
+    conn.commit()
     return True
 
 def chat_with_llm():
@@ -98,6 +78,7 @@ def chat_with_llm():
                 print("No matching memories found.")
         else:
             print("Use 'input: <memory>' or 'output: <question>'.")
+    conn.close()
 
 if __name__ == "__main__":
     chat_with_llm()
