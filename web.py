@@ -68,14 +68,42 @@ async def add(memory: str = Form(), user: dict = Depends(get_current_user)):
 
 @app.get("/query")
 async def query(q: str, user: dict = Depends(get_current_user)):
-    user_id = user["user_id"]
-    refined_query = handler.process_input(user_id, q, is_query=True, db_provider=db.provider)
-    results = db.query_memories(user_id, refined_query)
-    if results:
-        summary_prompt = f"Respond to '{q}' in natural language, using only: {results}. Avoid metadata or formatting."
-        response = handler.process_input(user_id, summary_prompt, is_query=False, db_provider=db.provider)
-        return {"results": response}
-    return {"results": "No matching memories found."}
+    try:
+        user_id = user["user_id"]
+        print(f"Processing query for user {user_id}: {q}")
+        
+        # Process the query
+        refined_query = handler.process_input(user_id, q, is_query=True, db_provider=db.provider)
+        print(f"Refined query: {refined_query}")
+        
+        # Query memories
+        results = db.query_memories(user_id, refined_query)
+        print(f"Query results: {results}")
+        
+        if results and len(results) > 0:
+            # Filter out empty results
+            filtered_results = [r for r in results if r and str(r).strip()]
+            if filtered_results:
+                summary_prompt = f"Answer this question: '{q}' using only this information: {filtered_results}. Give a direct, natural answer without any metadata."
+                response = handler.process_input(user_id, summary_prompt, is_query=False, db_provider=db.provider)
+                print(f"LLM response: {response}")
+                
+                # The LLM should now return a natural language string directly
+                if isinstance(response, str):
+                    response_text = response
+                elif isinstance(response, dict):
+                    # Fallback if still returning dict
+                    response_text = response.get('content', f"Based on your memories: {', '.join(filtered_results)}")
+                else:
+                    response_text = str(response) if response else "No response generated"
+                return {"results": response_text}
+        
+        return {"results": "No matching memories found."}
+    except Exception as e:
+        print(f"Error in /query: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {"results": f"Error processing query: {str(e)}"}
 
 @app.post("/upload")
 async def upload(mcp_data: dict, user: dict = Depends(get_current_user)):
@@ -87,4 +115,4 @@ async def upload(mcp_data: dict, user: dict = Depends(get_current_user)):
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8001)), reload=False)

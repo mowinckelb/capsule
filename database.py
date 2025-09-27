@@ -57,12 +57,22 @@ class DBHandler:
         else:
             raise NotImplementedError(f"add_memory not implemented for '{self.provider}'")
 
-    def query_memories(self, user_id: str, query_text: str):
+    def query_memories(self, user_id: str, query_text: str | dict):
         if self.provider == 'pinecone':
             index = self.get_index()
-            query_vector = self.model.encode(query_text).tolist()
+            
+            # Extract string content from query_text if it's a dict
+            if isinstance(query_text, dict):
+                # Try to get the most relevant text from the dict
+                text_content = query_text.get('summary', query_text.get('content', str(query_text)))
+            else:
+                text_content = str(query_text)
+            
+            query_vector = self.model.encode(text_content).tolist()
             results = index.query(vector=query_vector, top_k=5, include_metadata=True, namespace=user_id)
-            return [match.metadata.get("memory", match.metadata.get("summary", "")) for match in results.matches]
+            if not results or not hasattr(results, 'matches') or not results.matches:
+                return []
+            return [match.metadata.get("memory", match.metadata.get("summary", "")) for match in results.matches if match.metadata]
         else:
             raise NotImplementedError(f"query_memories not implemented for '{self.provider}'")
 
