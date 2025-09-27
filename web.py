@@ -10,11 +10,40 @@ import sqlite3
 import uvicorn
 import os
 
-handler = LLMHandler()
+try:
+    handler = LLMHandler()
+    print("✓ LLM Handler initialized successfully")
+except Exception as e:
+    print(f"✗ LLM Handler initialization failed: {e}")
+    handler = None
 
-db = DBHandler()
+try:
+    db = DBHandler()
+    print("✓ Database Handler initialized successfully")
+except Exception as e:
+    print(f"✗ Database Handler initialization failed: {e}")
+    db = None
 
 app = FastAPI()
+
+# Initialize SQLite database for users
+def init_user_db():
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, hashed_password TEXT)")
+    conn.commit()
+    conn.close()
+
+# Initialize database on startup
+init_user_db()
+
+# Debug environment variables on startup
+print("=== Environment Variables Debug ===")
+print(f"GROK_API_KEY: {'Set' if os.getenv('GROK_API_KEY') else 'Not set'}")
+print(f"PINECONE_API_KEY: {'Set' if os.getenv('PINECONE_API_KEY') else 'Not set'}")
+print(f"DEFAULT_PROVIDER: {os.getenv('DEFAULT_PROVIDER', 'grok')}")
+print(f"DEFAULT_DB_PROVIDER: {os.getenv('DEFAULT_DB_PROVIDER', 'pinecone')}")
+print("=====================================")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -58,6 +87,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.post("/add")
 async def add(memory: str = Form(), user: dict = Depends(get_current_user)):
     try:
+        if not handler:
+            raise HTTPException(status_code=500, detail="LLM Handler not initialized")
+        if not db:
+            raise HTTPException(status_code=500, detail="Database Handler not initialized")
+            
         user_id = user["user_id"]
         refined_memory = handler.process_input(user_id, memory, is_query=False, db_provider=db.provider)
         db.add_memory(user_id, refined_memory)
@@ -69,6 +103,11 @@ async def add(memory: str = Form(), user: dict = Depends(get_current_user)):
 @app.get("/query")
 async def query(q: str, user: dict = Depends(get_current_user)):
     try:
+        if not handler:
+            raise HTTPException(status_code=500, detail="LLM Handler not initialized")
+        if not db:
+            raise HTTPException(status_code=500, detail="Database Handler not initialized")
+            
         user_id = user["user_id"]
         print(f"Processing query for user {user_id}: {q}")
         
