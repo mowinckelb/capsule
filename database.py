@@ -61,6 +61,8 @@ class DBHandler:
             raise NotImplementedError(f"query_memories not implemented for '{self.provider}'")
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
     db = DBHandler()
     db.add_memory('test', 'Test memory')
-    print(db.query_memories('test', 'test'))
+    print(db.query_memories('test', 'memory'))
