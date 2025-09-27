@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 import sqlite3
 import os
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", all__backend='pybcrypt')
 
 handler = LLMHandler()
 
