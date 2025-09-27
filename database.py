@@ -41,10 +41,16 @@ class DBHandler:
             index = self.get_index()
             if isinstance(memory, dict):
                 content = memory.get('content', memory)
+                content = str(content) if not isinstance(content, str) else content
+                if not content:
+                    content = ''
                 vector = self.model.encode(content).tolist()
                 metadata = {'summary': memory.get('summary', ''), 'tags': memory.get('tags', [])}
             else:
                 content = memory
+                content = str(content) if not isinstance(content, str) else content
+                if not content:
+                    content = ''
                 vector = self.model.encode(memory).tolist()
                 metadata = {"memory": memory}
             index.upsert(vectors=[(f"id_{user_id}_{uuid.uuid4()}", vector, metadata)], namespace=user_id)
@@ -56,7 +62,7 @@ class DBHandler:
             index = self.get_index()
             query_vector = self.model.encode(query_text).tolist()
             results = index.query(vector=query_vector, top_k=5, include_metadata=True, namespace=user_id)
-            return [match.metadata["memory"] for match in results.matches]
+            return [match.metadata.get("memory", match.metadata.get("summary", "")) for match in results.matches]
         else:
             raise NotImplementedError(f"query_memories not implemented for '{self.provider}'")
 
