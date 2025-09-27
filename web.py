@@ -16,7 +16,7 @@ db = DBHandler()
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", options={'bcrypt': {'backend': 'python'}})
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
