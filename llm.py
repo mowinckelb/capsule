@@ -30,7 +30,7 @@ class LLMHandler:
         content = input_text if isinstance(input_text, str) else input_text.get('messages', [{}])[-1].get('content', str(input_text))
         
         if self.provider == 'grok':
-            prompt = f"{'Optimize this query' if is_query else 'Refine this input'} for {db_provider or 'abstracted'} storage in user {user_id}'s sovereign DB: {content}"
+            prompt = f"Optimize this query for search in {db_provider or 'abstracted'} storage in user {user_id}'s sovereign DB: {content}" if is_query else f"Refine this input for {db_provider or 'abstracted'} storage in user {user_id}'s sovereign DB: {content}"
             payload = {
                 "model": self.model,
                 "messages": [
