@@ -3,7 +3,7 @@ import requests
 from typing import Dict, Any
 import json
 from dotenv import load_dotenv
-from defaults import PROVIDERS, DEFAULT_PROVIDER
+from config.providers import LLM_PROVIDERS as PROVIDERS, DEFAULT_LLM_PROVIDER as DEFAULT_PROVIDER
 
 load_dotenv()
 

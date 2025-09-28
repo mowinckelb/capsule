@@ -1,19 +1,10 @@
 {
-  "version": 2,
-  "builds": [
-    {"src": "web.py", "use": "@render/python"},
-    {"src": "frontend/*.html", "use": "@render/static"}
-  ],
-  "env": {
-    "PYTHONPATH": "./"
-  },
   "services": [
     {
       "type": "web",
       "env": "python",
-      "runtimeVersion": "python3.12",
-      "buildCommand": "pip install -r requirements.txt",
-      "startCommand": "uvicorn web:app --host 0.0.0.0 --port $PORT"
+      "buildCommand": "pip install -r requirements.txt && pip uninstall -y pinecone-plugin-inference",
+      "startCommand": "uvicorn develop.app:create_app --factory --host 0.0.0.0 --port $PORT"
     }
   ]
 }

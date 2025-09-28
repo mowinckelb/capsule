@@ -3,7 +3,7 @@ import uuid
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
-from defaults import DB_PROVIDERS, DEFAULT_DB_PROVIDER
+from config.providers import DATABASE_PROVIDERS as DB_PROVIDERS, DEFAULT_DATABASE_PROVIDER as DEFAULT_DB_PROVIDER
 
 load_dotenv()
 
