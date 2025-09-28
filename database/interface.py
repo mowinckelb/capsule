@@ -4,7 +4,7 @@ Database Module Interface - Clean abstraction layer for other modules
 This is what other modules import to interact with database functionality.
 """
 
-from database import DBHandler
+from .database import DBHandler
 
 class DatabaseService:
     """

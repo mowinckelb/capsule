@@ -7,8 +7,8 @@ It can be run independently to test just the API functionality.
 
 import uvicorn
 import os
-from config import API_CONFIG
-from routes import api_routes
+from .config import API_CONFIG
+from .routes import api_routes
 
 def create_app():
     """Create and configure the FastAPI application"""

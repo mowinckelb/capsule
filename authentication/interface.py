@@ -4,7 +4,7 @@ Authentication Module Interface - Clean abstraction layer for other modules
 This is what other modules import to interact with authentication functionality.
 """
 
-from auth import AuthHandler
+from .auth import AuthHandler
 
 class AuthService:
     """

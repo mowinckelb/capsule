@@ -16,9 +16,11 @@ import os
 import uvicorn
 from pathlib import Path
 
-# Add current directory to path for module imports
+# Add current directory and parent directory to path for module imports
 current_dir = Path(__file__).parent
+parent_dir = current_dir.parent
 sys.path.append(str(current_dir))
+sys.path.append(str(parent_dir))
 
 # Import all module integrations
 from database import database_service

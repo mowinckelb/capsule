@@ -6,8 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Any
 import os
 
-from config import API_CONFIG
-from dependencies import get_database_service, get_llm_service, get_auth_service
+from .config import API_CONFIG
+from .dependencies import get_database_service, get_llm_service, get_auth_service
 
 class APIRoutes:
     """

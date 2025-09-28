@@ -11,7 +11,7 @@ Other modules should import from here:
     from llm import llm_service
 """
 
-from interface import llm_service
+from .interface import llm_service
 
 # Export the main service
 __all__ = ['llm_service']

@@ -4,9 +4,9 @@ API Module Interface - Clean abstraction layer for other modules
 This is what other modules import to interact with API functionality.
 """
 
-from routes import api_routes
-from server import create_app
-from dependencies import health_check_all_services
+from .routes import api_routes
+from .server import create_app
+from .dependencies import health_check_all_services
 
 class APIService:
     """

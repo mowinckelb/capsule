@@ -21,12 +21,7 @@ class MockService:
 def get_database_service():
     """Get database service instance"""
     try:
-        # Add database module to path
-        database_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database')
-        if database_path not in sys.path:
-            sys.path.append(database_path)
-        
-        from interface import database_service
+        from database import database_service
         return database_service
     except ImportError:
         return MockService("database")
@@ -35,12 +30,7 @@ def get_database_service():
 def get_llm_service():
     """Get LLM service instance"""
     try:
-        # Add LLM module to path
-        llm_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'llm')
-        if llm_path not in sys.path:
-            sys.path.append(llm_path)
-        
-        from interface import llm_service
+        from llm import llm_service
         return llm_service
     except ImportError:
         return MockService("llm")
@@ -49,12 +39,7 @@ def get_llm_service():
 def get_auth_service():
     """Get authentication service instance"""
     try:
-        # Add authentication module to path
-        auth_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'authentication')
-        if auth_path not in sys.path:
-            sys.path.append(auth_path)
-        
-        from interface import auth_service
+        from authentication import auth_service
         return auth_service
     except ImportError:
         return MockService("authentication")

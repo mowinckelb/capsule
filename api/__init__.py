@@ -12,7 +12,7 @@ Other modules should import from here:
     from api import api_service
 """
 
-from interface import api_service
+from .interface import api_service
 
 # Export the main service
 __all__ = ['api_service']

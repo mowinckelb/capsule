@@ -3,13 +3,13 @@ import os
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from config import AUTH_CONFIG
+from config.settings import SECURITY_CONFIG, DATABASE_CONFIG
 
 class AuthHandler:
     def __init__(self):
         self.pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
         self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-        self.db_path = AUTH_CONFIG['db_path']
+        self.db_path = DATABASE_CONFIG['users_db_path']
         self._init_database()
     
     def _init_database(self):

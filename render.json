@@ -4,7 +4,7 @@
       "type": "web",
       "env": "python",
       "buildCommand": "pip install -r requirements.txt && pip uninstall -y pinecone-plugin-inference",
-      "startCommand": "python app.py"
+      "startCommand": "uvicorn develop.app:create_app --factory --host 0.0.0.0 --port $PORT"
     }
   ]
 }

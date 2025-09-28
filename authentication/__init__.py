@@ -12,7 +12,7 @@ Other modules should import from here:
     from authentication import auth_service
 """
 
-from interface import auth_service
+from .interface import auth_service
 
 # Export the main service
 __all__ = ['auth_service']

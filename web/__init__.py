@@ -12,7 +12,7 @@ Other modules should import from here:
     from web import web_service
 """
 
-from interface import web_service
+from .interface import web_service
 
 # Export the main service
 __all__ = ['web_service']

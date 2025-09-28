@@ -11,8 +11,8 @@ import os
 # Add the database module to path
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database'))
 
-from database.interface import database_service
-from database.database import DBHandler
+from interface import database_service
+from database import DBHandler
 
 # Export for backward compatibility with existing code
 __all__ = ['database_service', 'DBHandler']

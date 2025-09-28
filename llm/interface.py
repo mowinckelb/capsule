@@ -4,7 +4,7 @@ LLM Module Interface - Clean abstraction layer for other modules
 This is what other modules import to interact with LLM functionality.
 """
 
-from llm import LLMHandler
+from .llm import LLMHandler
 
 class LLMService:
     """
