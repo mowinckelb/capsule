@@ -1,0 +1,10 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "env": "python",
+      "buildCommand": "pip install -r requirements.txt && pip uninstall -y pinecone-plugin-inference",
+      "startCommand": "python app.py"
+    }
+  ]
+}
