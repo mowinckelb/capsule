@@ -14,6 +14,8 @@ class WebService:
     
     def __init__(self):
         self.web_dir = Path(__file__).parent
+        # Point to the frontend directory where the actual web files are
+        self.frontend_dir = self.web_dir.parent / "frontend"
         self.static_files = self._discover_static_files()
     
     def _discover_static_files(self):
@@ -43,21 +45,21 @@ class WebService:
     
     def get_main_interface(self):
         """Get the main HTML interface file"""
-        interface_path = self.web_dir / "interface.html"
+        interface_path = self.frontend_dir / "components" / "interface.html"
         if interface_path.exists():
             return str(interface_path)
         return None
     
     def get_app_js(self):
         """Get the main JavaScript application file"""
-        app_js_path = self.web_dir / "app.js"
+        app_js_path = self.frontend_dir / "static" / "js" / "app.js"
         if app_js_path.exists():
             return str(app_js_path)
         return None
     
     def get_config_js(self):
         """Get the JavaScript configuration file"""
-        config_js_path = self.web_dir / "config.js"
+        config_js_path = self.frontend_dir / "static" / "js" / "config.js"
         if config_js_path.exists():
             return str(config_js_path)
         return None
@@ -93,7 +95,7 @@ class WebService:
     
     def serve_directory(self):
         """Get the directory to serve static files from"""
-        return str(self.web_dir)
+        return str(self.frontend_dir)
 
 # Global service instance that other modules can import
 web_service = WebService()
