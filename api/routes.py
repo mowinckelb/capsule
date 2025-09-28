@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Form
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Any
 import os
+from pathlib import Path
 
 from .config import API_CONFIG
 from .dependencies import get_database_service, get_llm_service, get_auth_service
@@ -36,9 +37,34 @@ class APIRoutes:
     def _setup_routes(self):
         """Setup all API routes"""
         
-        @self.app.get("/")
+        @self.app.get("/", response_class=HTMLResponse)
         async def root():
-            """Root endpoint - Welcome message and API info"""
+            """Root endpoint - Serve the web interface"""
+            try:
+                # Get the frontend HTML file
+                frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "interface.html"
+                if frontend_path.exists():
+                    return frontend_path.read_text(encoding='utf-8')
+                else:
+                    # Fallback to API info if frontend not found
+                    return """
+                    <html><body>
+                    <h1>🧠 Capsule - Personal Memory System</h1>
+                    <p>Frontend interface not found. API is running at <a href="/docs">/docs</a></p>
+                    </body></html>
+                    """
+            except Exception as e:
+                return f"""
+                <html><body>
+                <h1>🧠 Capsule - Personal Memory System</h1>
+                <p>Error loading interface: {e}</p>
+                <p>API is running at <a href="/docs">/docs</a></p>
+                </body></html>
+                """
+        
+        @self.app.get("/api")
+        async def api_info():
+            """API info endpoint"""
             return {
                 "message": "🧠 Capsule - Personal Memory System",
                 "status": "running",
@@ -220,7 +246,14 @@ class APIRoutes:
         
         # Mount static files (for web interface)
         if API_CONFIG['serve_static']:
-            self.app.mount("/", StaticFiles(directory=".", html=True), name="static")
+            try:
+                # Mount frontend static files
+                frontend_static_path = Path(__file__).parent.parent / "frontend" / "static"
+                if frontend_static_path.exists():
+                    self.app.mount("/static", StaticFiles(directory=str(frontend_static_path)), name="frontend_static")
+                    print(f"✅ Mounted frontend static files from {frontend_static_path}")
+            except Exception as e:
+                print(f"⚠️ Could not mount static files: {e}")
     
     def _get_current_user(self, token: str = Depends(get_auth_service().get_oauth2_scheme())):
         """Get current user dependency"""
