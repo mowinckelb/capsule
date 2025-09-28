@@ -36,6 +36,25 @@ class APIRoutes:
     def _setup_routes(self):
         """Setup all API routes"""
         
+        @self.app.get("/")
+        async def root():
+            """Root endpoint - Welcome message and API info"""
+            return {
+                "message": "🧠 Capsule - Personal Memory System",
+                "status": "running",
+                "version": "1.0.0",
+                "endpoints": {
+                    "register": "POST /register - Register a new user",
+                    "login": "POST /login - Login user",
+                    "add": "POST /add - Add a memory",
+                    "query": "GET /query?q=your_question - Query memories",
+                    "upload": "POST /upload - Upload MCP data",
+                    "health": "GET /health - Health check",
+                    "users": "GET /users - List users (admin)",
+                    "docs": "GET /docs - API documentation"
+                }
+            }
+        
         @self.app.post("/register")
         async def register(user_id: str = Form(), password: str = Form()):
             """Register a new user"""
