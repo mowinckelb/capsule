@@ -11,8 +11,8 @@ import os
 # Add the LLM module to path
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'llm'))
 
-from interface import llm_service
-from llm import LLMHandler
+from llm.interface import llm_service
+from llm.llm import LLMHandler
 
 # Export for backward compatibility with existing code
 __all__ = ['llm_service', 'LLMHandler']

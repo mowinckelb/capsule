@@ -4,11 +4,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
-from database import DBHandler
-from llm import LLMHandler
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from database.database import DBHandler
+from llm.llm import LLMHandler
 import sqlite3
 import uvicorn
-import os
 
 try:
     handler = LLMHandler()
