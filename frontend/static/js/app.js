@@ -136,7 +136,8 @@ class CapsuleApp {
         }
 
         toggle.setAttribute('data-mode', this.mode);
-        toggle.setAttribute('aria-checked', this.mode === 'output');
+        toggle.setAttribute('aria-checked', String(this.mode === 'output'));
+        toggle.setAttribute('aria-label', this.mode === 'output' ? 'Switch workspace to input mode' : 'Switch workspace to output mode');
         inputPane.classList.toggle('hidden', this.mode !== 'input');
         outputPane.classList.toggle('hidden', this.mode !== 'output');
     }
@@ -348,15 +349,21 @@ class CapsuleApp {
 
     convertToSecondPerson(text) {
         let output = text;
+        const matchCase = (original, replacement) => {
+            if (original.toUpperCase() === original) {
+                return replacement.toUpperCase();
+            }
+            if (original[0] && original[0] === original[0].toUpperCase()) {
+                return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+            }
+            return replacement;
+        };
+
         const replacements = [
-            { regex: /\bI am\b/gi, replacement: 'you are' },
-            { regex: /\bI'm\b/gi, replacement: 'you are' },
-            { regex: /\bI have\b/gi, replacement: 'you have' },
-            { regex: /\bI've\b/gi, replacement: 'you have' },
-            { regex: /\bI will\b/gi, replacement: 'you will' },
-            { regex: /\bI'll\b/gi, replacement: 'you will' },
-            { regex: /\bI would\b/gi, replacement: 'you would' },
-            { regex: /\bI'd\b/gi, replacement: 'you would' },
+            { regex: /\b(I am|I'm)\b/gi, replacement: 'you are' },
+            { regex: /\b(I have|I've)\b/gi, replacement: 'you have' },
+            { regex: /\b(I will|I'll)\b/gi, replacement: 'you will' },
+            { regex: /\b(I would|I'd)\b/gi, replacement: 'you would' },
             { regex: /\bI\b/gi, replacement: 'you' },
             { regex: /\bme\b/gi, replacement: 'you' },
             { regex: /\bmyself\b/gi, replacement: 'yourself' },
@@ -365,7 +372,7 @@ class CapsuleApp {
         ];
 
         replacements.forEach(({ regex, replacement }) => {
-            output = output.replace(regex, replacement);
+            output = output.replace(regex, (match) => matchCase(match, replacement));
         });
 
         return output;
