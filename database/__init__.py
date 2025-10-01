@@ -16,4 +16,4 @@ from .interface import database_service
 # Export the main service
 __all__ = ['database_service']
 
-print("✅ Database module loaded successfully")
+# Database module loaded successfully

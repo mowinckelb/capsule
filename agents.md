@@ -10,7 +10,7 @@ This repository coordinates multiple service-specific components (`api`, `authen
 - **Frontend Integration**: Surface agent capabilities through the `frontend` React application and the `web` service wrapper.
 
 ## Agent Definition Checklist
-1. Identify the agent’s goal and supported user journeys.
+1. Identify the agent's goal and supported user journeys.
 2. Determine required context (session state, stored records, external APIs).
 3. Map intents to handler functions within the `chat` or domain-specific modules.
 4. Validate security boundaries, especially around authentication and data reads/writes.
@@ -20,6 +20,12 @@ This repository coordinates multiple service-specific components (`api`, `authen
 - Keep sensitive configuration outside of source control; reference keys via environment variables.
 - Align agent logging with existing observability patterns in `app.py` and service modules.
 - Document meaningful behavioral changes in commit messages to aid cross-team coordination.
+
+## Lesson Capture Protocol
+Agents should periodically prompt to capture high-value learnings in `lessons.md`:
+- Trigger: Every 3-5 significant interactions or when completing complex tasks
+- Format: 1-2 line concise entries focused on reusable, axiomatic insights
+- Categories: Architecture, code quality, tooling, debugging, performance, security
 
 ## Next Steps
 Populate this document with deeper agent-specific playbooks as new capabilities are implemented.
