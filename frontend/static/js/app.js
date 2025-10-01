@@ -1,6 +1,5 @@
 /**
- * Capsule Web Interface JavaScript
- * Handles all frontend interactions with the API
+ * capsule web interface
  */
 
 class CapsuleApp {
@@ -8,61 +7,106 @@ class CapsuleApp {
         this.token = localStorage.getItem('capsule_token');
         this.user_id = localStorage.getItem('capsule_user_id');
         this.api_base = window.location.origin;
+        this.mode = 'input'; // 'input' or 'output'
         
-        // Initialize app
         this.init();
     }
     
     init() {
-        console.log('🚀 Initializing Capsule App');
-        
-        // Check if user is already logged in
         if (this.token && this.user_id) {
             this.showApp();
         } else {
             this.showAuth();
         }
         
-        // Add keyboard shortcuts
         this.setupKeyboardShortcuts();
     }
     
     setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + Enter to submit forms
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                const activeElement = document.activeElement;
-                if (activeElement.id === 'memory-input') {
-                    this.addMemory();
-                } else if (activeElement.id === 'query-input') {
-                    this.queryMemories();
+        const input = document.getElementById('main-input');
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSubmit();
                 }
-            }
-        });
+            });
+        }
+        
+        const loginPassword = document.getElementById('login-password');
+        if (loginPassword) {
+            loginPassword.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.login();
+                }
+            });
+        }
+        
+        const registerPassword = document.getElementById('register-password');
+        if (registerPassword) {
+            registerPassword.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.register();
+                }
+            });
+        }
     }
     
     showAuth() {
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('app-section').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('app-screen').classList.add('hidden');
     }
     
     showApp() {
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('app-section').classList.remove('hidden');
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-name').textContent = this.user_id;
+        
+        // Focus input
+        setTimeout(() => {
+            document.getElementById('main-input').focus();
+        }, 100);
     }
     
-    showMessage(elementId, message, type = 'info') {
-        const element = document.getElementById(elementId);
-        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
-        element.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+    setMode(mode) {
+        this.mode = mode;
+        document.getElementById('input-mode').classList.toggle('active', mode === 'input');
+        document.getElementById('output-mode').classList.toggle('active', mode === 'output');
         
-        // Auto-hide success messages after 3 seconds
-        if (type !== 'error') {
-            setTimeout(() => {
-                element.innerHTML = '';
-            }, 3000);
+        const input = document.getElementById('main-input');
+        if (mode === 'input') {
+            input.placeholder = 'type here...';
+        } else {
+            input.placeholder = 'ask something...';
         }
+        
+        input.focus();
+    }
+    
+    showStatus(message, isThinking = false) {
+        const statusEl = document.getElementById('status-message');
+        statusEl.textContent = message;
+        if (isThinking) {
+            statusEl.classList.add('thinking');
+        } else {
+            statusEl.classList.remove('thinking');
+        }
+    }
+    
+    clearStatus() {
+        setTimeout(() => {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = '';
+            statusEl.classList.remove('thinking');
+        }, 2000);
+    }
+    
+    showOutput(text) {
+        const outputEl = document.getElementById('output-content');
+        outputEl.textContent = text;
+    }
+    
+    clearOutput() {
+        document.getElementById('output-content').textContent = '';
     }
     
     async makeRequest(endpoint, options = {}) {
@@ -73,12 +117,10 @@ class CapsuleApp {
             }
         };
         
-        // Add auth token if available
         if (this.token) {
             defaultOptions.headers['Authorization'] = `Bearer ${this.token}`;
         }
         
-        // Handle form data
         if (options.body instanceof FormData) {
             delete defaultOptions.headers['Content-Type'];
         }
@@ -86,27 +128,40 @@ class CapsuleApp {
         const finalOptions = { ...defaultOptions, ...options };
         
         try {
-            console.log(`📡 Making request to ${endpoint}`);
             const response = await fetch(url, finalOptions);
             
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-                throw new Error(errorData.detail || `HTTP ${response.status}`);
+                const errorData = await response.json().catch(() => ({ detail: 'unknown error' }));
+                throw new Error(errorData.detail || `http ${response.status}`);
             }
             
             return await response.json();
         } catch (error) {
-            console.error(`❌ Request failed:`, error);
             throw error;
         }
     }
     
+    switchAuthMode(mode) {
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        if (mode === 'login') {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        } else {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        }
+        
+        document.getElementById('auth-message').textContent = '';
+    }
+    
     async register() {
-        const user_id = document.getElementById('register-user').value.trim();
+        const user_id = document.getElementById('register-user').value.trim().toLowerCase();
         const password = document.getElementById('register-password').value;
         
         if (!user_id || !password) {
-            this.showMessage('auth-message', 'Please fill in all fields', 'error');
+            document.getElementById('auth-message').textContent = 'please fill in all fields';
             return;
         }
         
@@ -115,28 +170,32 @@ class CapsuleApp {
             formData.append('user_id', user_id);
             formData.append('password', password);
             
-            const result = await this.makeRequest('/register', {
+            await this.makeRequest('/register', {
                 method: 'POST',
                 body: formData
             });
             
-            this.showMessage('auth-message', 'Registration successful! You can now login.', 'success');
+            document.getElementById('auth-message').textContent = 'account created. signing in...';
             
-            // Switch to login tab and pre-fill user ID
-            this.switchTab('login');
-            document.getElementById('login-user').value = user_id;
+            // Auto-login
+            setTimeout(() => {
+                document.getElementById('login-user').value = user_id;
+                document.getElementById('login-password').value = password;
+                this.switchAuthMode('login');
+                this.login();
+            }, 1000);
             
         } catch (error) {
-            this.showMessage('auth-message', `Registration failed: ${error.message}`, 'error');
+            document.getElementById('auth-message').textContent = `error: ${error.message}`;
         }
     }
     
     async login() {
-        const user_id = document.getElementById('login-user').value.trim();
+        const user_id = document.getElementById('login-user').value.trim().toLowerCase();
         const password = document.getElementById('login-password').value;
         
         if (!user_id || !password) {
-            this.showMessage('auth-message', 'Please fill in all fields', 'error');
+            document.getElementById('auth-message').textContent = 'please fill in all fields';
             return;
         }
         
@@ -150,21 +209,19 @@ class CapsuleApp {
                 body: formData
             });
             
-            // Store token and user info
             this.token = result.access_token;
             this.user_id = user_id;
             localStorage.setItem('capsule_token', this.token);
             localStorage.setItem('capsule_user_id', this.user_id);
             
-            this.showMessage('auth-message', 'Login successful!', 'success');
+            document.getElementById('auth-message').textContent = 'welcome back.';
             
-            // Show main app after brief delay
             setTimeout(() => {
                 this.showApp();
-            }, 1000);
+            }, 500);
             
         } catch (error) {
-            this.showMessage('auth-message', `Login failed: ${error.message}`, 'error');
+            document.getElementById('auth-message').textContent = `error: ${error.message}`;
         }
     }
     
@@ -174,131 +231,78 @@ class CapsuleApp {
         localStorage.removeItem('capsule_token');
         localStorage.removeItem('capsule_user_id');
         
-        // Clear forms
         document.getElementById('login-user').value = '';
         document.getElementById('login-password').value = '';
-        document.getElementById('memory-input').value = '';
-        document.getElementById('query-input').value = '';
+        document.getElementById('main-input').value = '';
+        this.clearOutput();
         
         this.showAuth();
     }
     
-    async addMemory() {
-        const memory = document.getElementById('memory-input').value.trim();
+    async handleSubmit() {
+        const input = document.getElementById('main-input');
+        const text = input.value.trim();
         
-        if (!memory) {
-            this.showMessage('add-message', 'Please enter a memory to save', 'error');
-            return;
+        if (!text) return;
+        
+        input.value = '';
+        
+        if (this.mode === 'input') {
+            await this.addMemory(text);
+        } else {
+            await this.queryMemories(text);
         }
-        
+    }
+    
+    async addMemory(memory) {
         try {
-            this.showMessage('add-message', '💾 Saving memory...', 'info');
+            this.showStatus('thinking', true);
+            this.clearOutput();
             
             const formData = new FormData();
             formData.append('memory', memory);
             
-            const result = await this.makeRequest('/add', {
+            await this.makeRequest('/add', {
                 method: 'POST',
                 body: formData
             });
             
-            this.showMessage('add-message', '✅ Memory saved successfully!', 'success');
-            document.getElementById('memory-input').value = '';
+            this.showStatus('memory saved.');
+            this.clearStatus();
             
         } catch (error) {
-            this.showMessage('add-message', `Failed to save memory: ${error.message}`, 'error');
+            this.showStatus(`error: ${error.message}`);
+            this.clearStatus();
         }
     }
     
-    async queryMemories() {
-        const query = document.getElementById('query-input').value.trim();
-        
-        if (!query) {
-            this.showMessage('query-results', '<div class="alert alert-error">Please enter a question</div>');
-            return;
-        }
-        
+    async queryMemories(query) {
         try {
-            // Show loading state
-            document.getElementById('query-results').innerHTML = 
-                '<div class="loading">🔍 Searching your memories...</div>';
+            this.showStatus('thinking', true);
+            this.clearOutput();
             
             const result = await this.makeRequest(`/query?q=${encodeURIComponent(query)}`);
             
-            // Display results
-            this.displayQueryResults(result.results, query);
+            this.showStatus('');
             
-            // Clear input
-            document.getElementById('query-input').value = '';
+            if (!result.results || result.results === "No matching memories found.") {
+                this.showOutput("i don't have any memories about that yet.");
+            } else {
+                this.showOutput(result.results);
+            }
             
         } catch (error) {
-            document.getElementById('query-results').innerHTML = 
-                `<div class="alert alert-error">Search failed: ${error.message}</div>`;
-        }
-    }
-    
-    displayQueryResults(results, query) {
-        const resultsContainer = document.getElementById('query-results');
-        
-        if (!results || results === "No matching memories found.") {
-            resultsContainer.innerHTML = `
-                <div class="memory-result">
-                    <h3>🤔 No Results Found</h3>
-                    <p>I couldn't find any memories related to "${query}". Try asking about something you've saved before, or save some memories first!</p>
-                </div>
-            `;
-            return;
-        }
-        
-        resultsContainer.innerHTML = `
-            <div class="memory-result">
-                <h3>💡 Answer</h3>
-                <p>${this.formatResponse(results)}</p>
-            </div>
-        `;
-    }
-    
-    formatResponse(response) {
-        // Basic formatting for better readability
-        return response
-            .replace(/\n/g, '<br>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>');
-    }
-    
-    switchTab(tab) {
-        // Update tab appearance
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelector(`.tab:nth-child(${tab === 'login' ? '1' : '2'})`).classList.add('active');
-        
-        // Show/hide forms
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        
-        if (tab === 'login') {
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-        } else {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-        }
-        
-        // Clear any previous messages
-        document.getElementById('auth-message').innerHTML = '';
-    }
-    
-    handleQueryKeypress(event) {
-        if (event.key === 'Enter') {
-            this.queryMemories();
+            this.showStatus('');
+            this.showOutput(`error: ${error.message}`);
         }
     }
 }
 
-// Global functions for HTML onclick handlers
+// global functions
 let app;
 
-function switchTab(tab) {
-    app.switchTab(tab);
+function switchAuthMode(mode) {
+    app.switchAuthMode(mode);
 }
 
 function register() {
@@ -313,19 +317,11 @@ function logout() {
     app.logout();
 }
 
-function addMemory() {
-    app.addMemory();
+function setMode(mode) {
+    app.setMode(mode);
 }
 
-function queryMemories() {
-    app.queryMemories();
-}
-
-function handleQueryKeypress(event) {
-    app.handleQueryKeypress(event);
-}
-
-// Initialize app when DOM is loaded
+// initialize
 document.addEventListener('DOMContentLoaded', () => {
     app = new CapsuleApp();
 });

@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
@@ -24,7 +25,6 @@ class DBHandler:
             self.metric = provider_config['metric']
             self.spec = ServerlessSpec(cloud=provider_config['cloud'], region=provider_config['region'])
         else:
-            # TODO: Add new provider setup here, e.g., elif provider == 'chroma': self.client = chromadb.Client(provider_config['path'])
             raise NotImplementedError(f"Provider '{provider}' not implemented yet—add in __init__ using provider_config")
 
     def get_index(self):
@@ -39,20 +39,29 @@ class DBHandler:
     def add_memory(self, user_id: str, memory: str | dict):
         if self.provider == 'pinecone':
             index = self.get_index()
+            timestamp = datetime.now().isoformat()
+            
             if isinstance(memory, dict):
                 content = memory.get('content', memory)
                 content = str(content) if not isinstance(content, str) else content
                 if not content:
                     content = ''
                 vector = self.model.encode(content).tolist()
-                metadata = {'summary': memory.get('summary', ''), 'tags': memory.get('tags', [])}
+                metadata = {
+                    'summary': memory.get('summary', ''),
+                    'tags': memory.get('tags', []),
+                    'timestamp': timestamp
+                }
             else:
                 content = memory
                 content = str(content) if not isinstance(content, str) else content
                 if not content:
                     content = ''
                 vector = self.model.encode(memory).tolist()
-                metadata = {"memory": memory}
+                metadata = {
+                    "memory": memory,
+                    "timestamp": timestamp
+                }
             index.upsert(vectors=[(f"id_{user_id}_{uuid.uuid4()}", vector, metadata)], namespace=user_id)
         else:
             raise NotImplementedError(f"add_memory not implemented for '{self.provider}'")
@@ -61,9 +70,7 @@ class DBHandler:
         if self.provider == 'pinecone':
             index = self.get_index()
             
-            # Extract string content from query_text if it's a dict
             if isinstance(query_text, dict):
-                # Try to get the most relevant text from the dict
                 text_content = query_text.get('summary', query_text.get('content', str(query_text)))
             else:
                 text_content = str(query_text)
