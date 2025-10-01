@@ -12,57 +12,179 @@
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            background: #000;
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            background: #fafafa;
+            color: #1a1a1a;
             line-height: 1.6;
             height: 100vh;
             overflow: hidden;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+        
+        .auth-screen {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .auth-toggle {
+            position: relative;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 2px;
+            display: inline-flex;
+            margin-bottom: 1.5rem;
+        }
+        
+        .auth-toggle-btn {
+            position: relative;
+            background: transparent;
+            border: none;
+            padding: 4px 16px;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 0.85rem;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 2;
+        }
+        
+        .auth-toggle-btn.active {
+            color: #1a1a1a;
+        }
+        
+        .auth-toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: calc(50% - 2px);
+            height: calc(100% - 4px);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        
+        .auth-toggle-slider.register {
+            transform: translateX(100%);
+        }
+        
+        .auth-form {
+            width: 100%;
+            max-width: 360px;
+        }
+        
+        .input-bubble {
+            background: #f0f0f0;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            width: 100%;
+            margin-bottom: 12px;
+            outline: none;
+            transition: background 0.2s ease;
+            caret-color: #1a1a1a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .input-bubble::placeholder {
+            color: #999;
+        }
+        
+        .input-bubble:focus {
+            background: #e8e8e8;
+        }
+        
+        @supports (caret-width: 2px) {
+            .input-bubble {
+                caret-width: 2px;
+            }
+        }
+        
+        .input-bubble {
+            caret-color: rgba(26, 26, 26, 0.4);
+        }
+        
+
+        
+        .auth-message {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            color: #666;
         }
         
         .app-container {
             height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 2rem;
+            padding: 1.5rem;
         }
         
-        /* Header */
         .header {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        
-        .header h1 {
-            font-size: 2rem;
-            font-weight: normal;
-            letter-spacing: 0.2em;
-        }
-        
-        /* User info bar */
-        .user-bar {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 2rem;
-            font-size: 0.9rem;
-            opacity: 0.7;
+            opacity: 0.4;
+            font-size: 0.85rem;
         }
         
-        .user-bar button {
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .header-item {
             background: none;
             border: none;
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 0.85rem;
+            color: #1a1a1a;
             cursor: pointer;
-            text-decoration: underline;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            margin-left: 1rem;
+            padding: 0;
         }
         
-        .user-bar button:hover {
+        .header-item:hover {
             opacity: 0.7;
         }
         
-        /* Output area */
+        .header-divider {
+            color: #ccc;
+        }
+        
         .output-area {
             flex: 1;
             display: flex;
@@ -77,170 +199,162 @@
             font-size: 1.2rem;
             text-align: center;
             animation: fadeIn 0.5s ease-in;
+            color: #2a2a2a;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Input area */
         .input-area {
-            padding: 2rem 0;
-            border-top: 1px solid #333;
-        }
-        
-        .input-controls {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 1rem;
+            padding-bottom: 1.5rem;
         }
         
         .mode-toggle {
             display: flex;
-            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0 20px;
         }
         
-        .mode-btn {
-            background: none;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.5rem 1.5rem;
+        .toggle-container {
+            position: relative;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 2px;
+            display: inline-flex;
+        }
+        
+        .toggle-btn {
+            position: relative;
+            background: transparent;
+            border: none;
+            padding: 4px 16px;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 0.85rem;
+            color: #666;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            transition: color 0.3s ease;
+            z-index: 2;
+            outline: none;
         }
         
-        .mode-btn:hover {
-            border-color: #fff;
+        .toggle-btn.active {
+            color: #1a1a1a;
         }
         
-        .mode-btn.active {
-            background: #fff;
-            color: #000;
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: calc(50% - 2px);
+            height: calc(100% - 4px);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        
+        .toggle-slider.output {
+            transform: translateX(100%);
+        }
+        
+        .provider-info {
+            font-size: 0.75rem;
+            color: #999;
+            opacity: 0.8;
         }
         
         .input-wrapper {
-            position: relative;
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto;
         }
         
         .input-box {
             width: 100%;
-            background: #000;
+            background: #f4f4f4;
             border: none;
-            border-bottom: 2px solid #fff;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
-            padding: 1rem 0;
+            border-radius: 16px;
+            color: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 1.1rem;
+            padding: 16px 20px;
             outline: none;
-            caret-color: #fff;
-            caret-width: thick;
+            transition: background 0.2s ease;
+            caret-color: #1a1a1a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
         
-        .input-box::placeholder {
-            color: #555;
+        @supports (caret-width: 2px) {
+            .input-box {
+                caret-width: 2px;
+            }
+        }
+        
+        .input-box {
+            caret-color: rgba(26, 26, 26, 0.4);
+        }
+        
+        .input-box:focus {
+            background: #efefef;
         }
         
         .status-message {
             font-size: 0.8rem;
-            margin-top: 0.5rem;
-            min-height: 1.5rem;
-            opacity: 0.7;
+            margin-top: 0.75rem;
+            text-align: left;
+            padding-left: 20px;
+            min-height: 1.2rem;
+            color: #999;
+            display: flex;
+            align-items: center;
+        }
+        
+        .thinking {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+        
+        .thinking::before,
+        .thinking::after {
+            content: '';
+            width: 3px;
+            height: 3px;
+            background: #999;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .thinking::before {
+            animation: bounce 1.4s infinite ease-in-out;
         }
         
         .thinking::after {
-            content: '';
-            animation: ellipsis 1.5s infinite;
+            animation: bounce 1.4s infinite ease-in-out 0.32s;
         }
         
-        @keyframes ellipsis {
-            0% { content: ''; }
-            25% { content: '.'; }
-            50% { content: '..'; }
-            75% { content: '...'; }
-            100% { content: ''; }
+        .thinking-dot {
+            width: 3px;
+            height: 3px;
+            background: #999;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out 0.16s;
         }
         
-        /* Auth screen */
-        .auth-screen {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        
-        .auth-screen h1 {
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            letter-spacing: 0.2em;
-        }
-        
-        .auth-form {
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .auth-input {
-            width: 100%;
-            background: #000;
-            border: none;
-            border-bottom: 2px solid #fff;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            padding: 1rem 0;
-            margin-bottom: 1.5rem;
-            outline: none;
-        }
-        
-        .auth-input::placeholder {
-            color: #555;
-        }
-        
-        .auth-btn {
-            width: 100%;
-            background: #fff;
-            color: #000;
-            border: none;
-            padding: 1rem;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-bottom: 1rem;
-            transition: opacity 0.2s;
-        }
-        
-        .auth-btn:hover {
-            opacity: 0.8;
-        }
-        
-        .auth-link {
-            text-align: center;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-        
-        .auth-link button {
-            background: none;
-            border: none;
-            color: #fff;
-            text-decoration: underline;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .auth-message {
-            text-align: center;
-            margin-top: 1rem;
-            font-size: 0.9rem;
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-6px);
+            }
         }
         
         .hidden {
@@ -249,59 +363,52 @@
     </style>
 </head>
 <body>
-    <!-- Auth Screen -->
     <div id="auth-screen" class="auth-screen">
-        <h1>capsule</h1>
-        
-        <div id="login-form" class="auth-form">
-            <input type="text" id="login-user" class="auth-input" placeholder="username">
-            <input type="password" id="login-password" class="auth-input" placeholder="password">
-            <button class="auth-btn" onclick="login()">sign in</button>
-            <div class="auth-link">
-                <span>need an account?</span>
-                <button onclick="switchAuthMode('register')">register</button>
-            </div>
+        <div class="auth-toggle">
+            <button class="auth-toggle-btn active" id="login-toggle" onclick="switchAuthMode('login')">sign in</button>
+            <button class="auth-toggle-btn" id="register-toggle" onclick="switchAuthMode('register')">sign up</button>
+            <div class="auth-toggle-slider" id="auth-slider"></div>
         </div>
         
-        <div id="register-form" class="auth-form hidden">
-            <input type="text" id="register-user" class="auth-input" placeholder="choose username">
-            <input type="password" id="register-password" class="auth-input" placeholder="choose password">
-            <button class="auth-btn" onclick="register()">create account</button>
-            <div class="auth-link">
-                <span>already have an account?</span>
-                <button onclick="switchAuthMode('login')">sign in</button>
-            </div>
+        <div class="auth-form">
+            <input type="text" id="auth-username" class="input-bubble" placeholder="" autocomplete="off" spellcheck="false">
+            <input type="password" id="auth-password" class="input-bubble" placeholder="" autocomplete="off" spellcheck="false">
         </div>
         
         <div id="auth-message" class="auth-message"></div>
     </div>
     
-    <!-- Main App -->
     <div id="app-screen" class="app-container hidden">
         <div class="header">
-            <h1>capsule</h1>
-        </div>
-        
-        <div class="user-bar">
-            <span id="user-name"></span>
-            <button onclick="logout()">sign out</button>
+            <div class="header-left">
+                <span id="user-name" tabindex="0"></span>
+                <span class="header-divider">·</span>
+                <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
+            </div>
+            <div class="header-center">
+                <span>capsule</span>
+            </div>
         </div>
         
         <div class="output-area">
-            <div id="output-content" class="output-content">
-            </div>
+            <div id="output-content" class="output-content"></div>
         </div>
         
         <div class="input-area">
-            <div class="input-controls">
-                <div class="mode-toggle">
-                    <button id="input-mode" class="mode-btn active" onclick="setMode('input')">input</button>
-                    <button id="output-mode" class="mode-btn" onclick="setMode('output')">output</button>
-                </div>
-            </div>
-            
             <div class="input-wrapper">
-                <input type="text" id="main-input" class="input-box" placeholder="type here..." autocomplete="off">
+                <div class="mode-toggle">
+                    <div class="toggle-container" id="toggle-container" tabindex="0">
+                        <button class="toggle-btn active" id="input-mode-btn" onclick="setMode('input')" tabindex="-1">input</button>
+                        <button class="toggle-btn" id="output-mode-btn" onclick="setMode('output')" tabindex="-1">output</button>
+                        <div class="toggle-slider" id="mode-slider"></div>
+                    </div>
+                    
+                    <div class="provider-info" id="provider-info">
+                        <span id="llm-provider">loading...</span> | <span id="storage-provider">loading...</span>
+                    </div>
+                </div>
+                
+                <input type="text" id="main-input" class="input-box" autocomplete="off" tabindex="0" spellcheck="false">
                 <div id="status-message" class="status-message"></div>
             </div>
         </div>

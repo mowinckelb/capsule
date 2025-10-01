@@ -7,13 +7,13 @@ class CapsuleApp {
         this.token = localStorage.getItem('capsule_token');
         this.user_id = localStorage.getItem('capsule_user_id');
         this.api_base = window.location.origin;
-        this.mode = 'input'; // 'input' or 'output'
+        this.mode = 'input';
+        this.authMode = 'login';
         
         this.init();
     }
     
     init() {
-        // Wait for DOM to be ready before accessing elements
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initAfterDOM());
         } else {
@@ -32,90 +32,186 @@ class CapsuleApp {
     }
     
     setupKeyboardShortcuts() {
-        const input = document.getElementById('main-input');
-        if (input) {
-            input.addEventListener('keypress', (e) => {
+        // Auth screen navigation
+        const authUsername = document.getElementById('auth-username');
+        const authPassword = document.getElementById('auth-password');
+        
+        if (authUsername) {
+            authUsername.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
+                    authPassword.focus();
+                }
+            });
+        }
+        
+        if (authPassword) {
+            authPassword.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleAuth();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.switchAuthMode(this.authMode === 'login' ? 'register' : 'login');
+                }
+            });
+        }
+        
+        if (authUsername) {
+            authUsername.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.switchAuthMode(this.authMode === 'login' ? 'register' : 'login');
+                }
+            });
+        }
+        
+        // Main input
+        const mainInput = document.getElementById('main-input');
+        if (mainInput) {
+            mainInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
                     this.handleSubmit();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    // Toggle mode without changing focus
+                    if (this.mode === 'input') {
+                        this.setMode('output');
+                    } else {
+                        this.setMode('input');
+                    }
                 }
             });
         }
         
-        const loginPassword = document.getElementById('login-password');
-        if (loginPassword) {
-            loginPassword.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.login();
-                }
-            });
-        }
-        
-        const registerPassword = document.getElementById('register-password');
-        if (registerPassword) {
-            registerPassword.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.register();
+        // Toggle container navigation
+        const toggleContainer = document.getElementById('toggle-container');
+        if (toggleContainer) {
+            toggleContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.setMode('input');
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.setMode('output');
+                } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (mainInput) mainInput.focus();
                 }
             });
         }
     }
     
     showAuth() {
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('app-screen').classList.add('hidden');
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        if (authScreen) authScreen.classList.remove('hidden');
+        if (appScreen) appScreen.classList.add('hidden');
+        
+        // Auto-focus username field
+        setTimeout(() => {
+            const authUsername = document.getElementById('auth-username');
+            if (authUsername) authUsername.focus();
+        }, 100);
     }
     
     showApp() {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app-screen').classList.remove('hidden');
-        document.getElementById('user-name').textContent = this.user_id;
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const userName = document.getElementById('user-name');
         
-        // Focus input
+        if (authScreen) authScreen.classList.add('hidden');
+        if (appScreen) appScreen.classList.remove('hidden');
+        if (userName) userName.textContent = this.user_id;
+        
+        // Load provider info
+        this.loadProviders();
+        
         setTimeout(() => {
-            document.getElementById('main-input').focus();
+            const mainInput = document.getElementById('main-input');
+            if (mainInput) mainInput.focus();
         }, 100);
+    }
+    
+    async loadProviders() {
+        try {
+            const data = await this.makeRequest('/providers');
+            const llmProvider = document.getElementById('llm-provider');
+            const storageProvider = document.getElementById('storage-provider');
+            if (llmProvider) llmProvider.textContent = data.llm;
+            if (storageProvider) storageProvider.textContent = data.storage;
+        } catch (error) {
+            console.error('Failed to load providers:', error);
+        }
+    }
+    
+    switchAuthMode(mode) {
+        this.authMode = mode;
+        const slider = document.getElementById('auth-slider');
+        const submitBtn = document.getElementById('auth-submit-btn');
+        const loginToggle = document.getElementById('login-toggle');
+        const registerToggle = document.getElementById('register-toggle');
+        
+        if (mode === 'register') {
+            if (slider) slider.classList.add('register');
+            if (submitBtn) submitBtn.textContent = 'sign up';
+            if (loginToggle) loginToggle.classList.remove('active');
+            if (registerToggle) registerToggle.classList.add('active');
+        } else {
+            if (slider) slider.classList.remove('register');
+            if (submitBtn) submitBtn.textContent = 'sign in';
+            if (loginToggle) loginToggle.classList.add('active');
+            if (registerToggle) registerToggle.classList.remove('active');
+        }
     }
     
     setMode(mode) {
         this.mode = mode;
-        document.getElementById('input-mode').classList.toggle('active', mode === 'input');
-        document.getElementById('output-mode').classList.toggle('active', mode === 'output');
+        const slider = document.getElementById('mode-slider');
+        const inputBtn = document.getElementById('input-mode-btn');
+        const outputBtn = document.getElementById('output-mode-btn');
         
-        const input = document.getElementById('main-input');
-        if (mode === 'input') {
-            input.placeholder = 'type here...';
+        if (mode === 'output') {
+            if (slider) slider.classList.add('output');
+            if (inputBtn) inputBtn.classList.remove('active');
+            if (outputBtn) outputBtn.classList.add('active');
         } else {
-            input.placeholder = 'ask something...';
+            if (slider) slider.classList.remove('output');
+            if (inputBtn) inputBtn.classList.add('active');
+            if (outputBtn) outputBtn.classList.remove('active');
         }
         
-        input.focus();
+        const mainInput = document.getElementById('main-input');
+        if (mainInput) mainInput.focus();
     }
     
     showStatus(message, isThinking = false) {
         const statusEl = document.getElementById('status-message');
-        statusEl.textContent = message;
+        if (!statusEl) return;
+        
         if (isThinking) {
-            statusEl.classList.add('thinking');
+            statusEl.innerHTML = '<span class="thinking"><span class="thinking-dot"></span></span>';
         } else {
-            statusEl.classList.remove('thinking');
+            statusEl.textContent = message;
         }
     }
     
     clearStatus() {
         setTimeout(() => {
             const statusEl = document.getElementById('status-message');
-            statusEl.textContent = '';
-            statusEl.classList.remove('thinking');
+            if (statusEl) statusEl.textContent = '';
         }, 2000);
     }
     
     showOutput(text) {
         const outputEl = document.getElementById('output-content');
-        outputEl.textContent = text;
+        if (outputEl) outputEl.textContent = text;
     }
     
     clearOutput() {
-        document.getElementById('output-content').textContent = '';
+        const outputEl = document.getElementById('output-content');
+        if (outputEl) outputEl.textContent = '';
     }
     
     async makeRequest(endpoint, options = {}) {
@@ -141,7 +237,7 @@ class CapsuleApp {
             
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ detail: 'unknown error' }));
-                throw new Error(errorData.detail || `http ${response.status}`);
+                throw new Error((errorData.detail || `http ${response.status}`).toLowerCase());
             }
             
             return await response.json();
@@ -150,88 +246,62 @@ class CapsuleApp {
         }
     }
     
-    switchAuthMode(mode) {
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
+    async handleAuth() {
+        const username = document.getElementById('auth-username');
+        const password = document.getElementById('auth-password');
+        const messageEl = document.getElementById('auth-message');
         
-        if (mode === 'login') {
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-        } else {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-        }
+        if (!username || !password) return;
         
-        document.getElementById('auth-message').textContent = '';
-    }
-    
-    async register() {
-        const user_id = document.getElementById('register-user').value.trim().toLowerCase();
-        const password = document.getElementById('register-password').value;
+        const user_id = username.value.trim().toLowerCase();
+        const pass = password.value;
         
-        if (!user_id || !password) {
-            document.getElementById('auth-message').textContent = 'please fill in all fields';
+        if (!user_id || !pass) {
+            if (messageEl) messageEl.textContent = 'please fill in all fields';
             return;
         }
         
         try {
-            const formData = new FormData();
-            formData.append('user_id', user_id);
-            formData.append('password', password);
-            
-            await this.makeRequest('/register', {
-                method: 'POST',
-                body: formData
-            });
-            
-            document.getElementById('auth-message').textContent = 'account created. signing in...';
-            
-            // Auto-login
-            setTimeout(() => {
-                document.getElementById('login-user').value = user_id;
-                document.getElementById('login-password').value = password;
-                this.switchAuthMode('login');
-                this.login();
-            }, 1000);
-            
+            if (this.authMode === 'register') {
+                await this.register(user_id, pass);
+            } else {
+                await this.login(user_id, pass);
+            }
         } catch (error) {
-            document.getElementById('auth-message').textContent = `error: ${error.message}`;
+            if (messageEl) messageEl.textContent = `error: ${error.message}`;
         }
     }
     
-    async login() {
-        const user_id = document.getElementById('login-user').value.trim().toLowerCase();
-        const password = document.getElementById('login-password').value;
+    async register(user_id, password) {
+        const formData = new FormData();
+        formData.append('user_id', user_id);
+        formData.append('password', password);
         
-        if (!user_id || !password) {
-            document.getElementById('auth-message').textContent = 'please fill in all fields';
-            return;
-        }
+        await this.makeRequest('/register', {
+            method: 'POST',
+            body: formData
+        });
         
-        try {
-            const formData = new FormData();
-            formData.append('username', user_id);
-            formData.append('password', password);
-            
-            const result = await this.makeRequest('/login', {
-                method: 'POST',
-                body: formData
-            });
-            
-            this.token = result.access_token;
-            this.user_id = user_id;
-            localStorage.setItem('capsule_token', this.token);
-            localStorage.setItem('capsule_user_id', this.user_id);
-            
-            document.getElementById('auth-message').textContent = 'welcome back.';
-            
-            setTimeout(() => {
-                this.showApp();
-            }, 500);
-            
-        } catch (error) {
-            document.getElementById('auth-message').textContent = `error: ${error.message}`;
-        }
+        // Auto-login after registration
+        await this.login(user_id, password);
+    }
+    
+    async login(user_id, password) {
+        const formData = new FormData();
+        formData.append('username', user_id);
+        formData.append('password', password);
+        
+        const result = await this.makeRequest('/login', {
+            method: 'POST',
+            body: formData
+        });
+        
+        this.token = result.access_token;
+        this.user_id = user_id;
+        localStorage.setItem('capsule_token', this.token);
+        localStorage.setItem('capsule_user_id', this.user_id);
+        
+        this.showApp();
     }
     
     logout() {
@@ -240,18 +310,25 @@ class CapsuleApp {
         localStorage.removeItem('capsule_token');
         localStorage.removeItem('capsule_user_id');
         
-        document.getElementById('login-user').value = '';
-        document.getElementById('login-password').value = '';
-        document.getElementById('main-input').value = '';
-        this.clearOutput();
+        const authUsername = document.getElementById('auth-username');
+        const authPassword = document.getElementById('auth-password');
+        const authMessage = document.getElementById('auth-message');
+        const mainInput = document.getElementById('main-input');
         
+        if (authUsername) authUsername.value = '';
+        if (authPassword) authPassword.value = '';
+        if (authMessage) authMessage.textContent = '';
+        if (mainInput) mainInput.value = '';
+        
+        this.clearOutput();
         this.showAuth();
     }
     
     async handleSubmit() {
         const input = document.getElementById('main-input');
-        const text = input.value.trim();
+        if (!input) return;
         
+        const text = input.value.trim();
         if (!text) return;
         
         input.value = '';
@@ -265,7 +342,7 @@ class CapsuleApp {
     
     async addMemory(memory) {
         try {
-            this.showStatus('thinking', true);
+            this.showStatus('', true);
             this.clearOutput();
             
             const formData = new FormData();
@@ -278,7 +355,6 @@ class CapsuleApp {
             
             this.showStatus('memory saved.');
             this.clearStatus();
-            
         } catch (error) {
             this.showStatus(`error: ${error.message}`);
             this.clearStatus();
@@ -287,7 +363,7 @@ class CapsuleApp {
     
     async queryMemories(query) {
         try {
-            this.showStatus('thinking', true);
+            this.showStatus('', true);
             this.clearOutput();
             
             const result = await this.makeRequest(`/query?q=${encodeURIComponent(query)}`);
@@ -299,7 +375,6 @@ class CapsuleApp {
             } else {
                 this.showOutput(result.results);
             }
-            
         } catch (error) {
             this.showStatus('');
             this.showOutput(`error: ${error.message}`);
@@ -315,14 +390,9 @@ function switchAuthMode(mode) {
     app.switchAuthMode(mode);
 }
 
-function register() {
+function handleAuth() {
     if (!app) { console.error('App not initialized'); return; }
-    app.register();
-}
-
-function login() {
-    if (!app) { console.error('App not initialized'); return; }
-    app.login();
+    app.handleAuth();
 }
 
 function logout() {

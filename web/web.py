@@ -163,5 +163,17 @@ async def root():
     interface_path = os.path.join(frontend_dir, "components", "interface.html")
     return FileResponse(interface_path)
 
+# Get provider info
+@app.get("/providers")
+async def get_providers():
+    from llm.config import DEFAULT_PROVIDER, PROVIDERS
+    from database.config import DEFAULT_DB_PROVIDER
+    
+    llm_model = PROVIDERS[DEFAULT_PROVIDER]['model']
+    return {
+        "llm": llm_model,
+        "storage": DEFAULT_DB_PROVIDER
+    }
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8001)), reload=False)
