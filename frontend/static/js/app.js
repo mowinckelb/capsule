@@ -50,6 +50,18 @@ class CapsuleApp {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     this.handleAuth();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.switchAuthMode(this.authMode === 'login' ? 'register' : 'login');
+                }
+            });
+        }
+        
+        if (authUsername) {
+            authUsername.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.switchAuthMode(this.authMode === 'login' ? 'register' : 'login');
                 }
             });
         }
@@ -69,6 +81,23 @@ class CapsuleApp {
                     } else {
                         this.setMode('input');
                     }
+                }
+            });
+        }
+        
+        // Toggle container navigation
+        const toggleContainer = document.getElementById('toggle-container');
+        if (toggleContainer) {
+            toggleContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.setMode('input');
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.setMode('output');
+                } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (mainInput) mainInput.focus();
                 }
             });
         }
@@ -96,10 +125,25 @@ class CapsuleApp {
         if (appScreen) appScreen.classList.remove('hidden');
         if (userName) userName.textContent = this.user_id;
         
+        // Load provider info
+        this.loadProviders();
+        
         setTimeout(() => {
             const mainInput = document.getElementById('main-input');
             if (mainInput) mainInput.focus();
         }, 100);
+    }
+    
+    async loadProviders() {
+        try {
+            const data = await this.makeRequest('/providers');
+            const llmProvider = document.getElementById('llm-provider');
+            const storageProvider = document.getElementById('storage-provider');
+            if (llmProvider) llmProvider.textContent = data.llm;
+            if (storageProvider) storageProvider.textContent = data.storage;
+        } catch (error) {
+            console.error('Failed to load providers:', error);
+        }
     }
     
     switchAuthMode(mode) {

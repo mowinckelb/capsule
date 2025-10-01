@@ -326,7 +326,7 @@
         }
         
         .status-message {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             margin-top: 0.75rem;
             text-align: left;
             padding-left: 20px;
@@ -337,7 +337,7 @@
         .thinking {
             display: inline-flex;
             gap: 3px;
-            margin-left: 2px;
+            margin-left: 0px;
         }
         
         .thinking::before,
@@ -390,8 +390,8 @@
         </div>
         
         <div class="auth-form">
-            <input type="text" id="auth-username" class="input-bubble" placeholder="" autocomplete="username">
-            <input type="password" id="auth-password" class="input-bubble" placeholder="" autocomplete="current-password">
+            <input type="text" id="auth-username" class="input-bubble" placeholder="" autocomplete="off">
+            <input type="password" id="auth-password" class="input-bubble" placeholder="" autocomplete="off">
             <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">sign in</button>
         </div>
         
@@ -401,9 +401,9 @@
     <div id="app-screen" class="app-container hidden">
         <div class="header">
             <div class="header-left">
-                <span id="user-name"></span>
+                <span id="user-name" tabindex="0"></span>
                 <span class="header-divider">·</span>
-                <button class="header-item" onclick="logout()">sign out</button>
+                <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
             </div>
             <div class="header-center">
                 <span>capsule</span>
@@ -417,14 +417,14 @@
         <div class="input-area">
             <div class="input-wrapper">
                 <div class="mode-toggle">
-                    <div class="toggle-container" id="toggle-container" tabindex="-1">
+                    <div class="toggle-container" id="toggle-container" tabindex="0">
                         <button class="toggle-btn active" id="input-mode-btn" onclick="setMode('input')" tabindex="-1">input</button>
                         <button class="toggle-btn" id="output-mode-btn" onclick="setMode('output')" tabindex="-1">output</button>
                         <div class="toggle-slider" id="mode-slider"></div>
                     </div>
                     
                     <div class="provider-info" id="provider-info">
-                        <span id="llm-provider">openai</span> | <span id="storage-provider">sqlite</span>
+                        <span id="llm-provider">loading...</span> | <span id="storage-provider">loading...</span>
                     </div>
                 </div>
                 
