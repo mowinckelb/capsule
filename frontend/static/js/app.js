@@ -179,7 +179,7 @@ class CapsuleApp {
             
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ detail: 'unknown error' }));
-                throw new Error(errorData.detail || `http ${response.status}`);
+                throw new Error((errorData.detail || `http ${response.status}`).toLowerCase());
             }
             
             return await response.json();
@@ -254,10 +254,12 @@ class CapsuleApp {
         
         const authUsername = document.getElementById('auth-username');
         const authPassword = document.getElementById('auth-password');
+        const authMessage = document.getElementById('auth-message');
         const mainInput = document.getElementById('main-input');
         
         if (authUsername) authUsername.value = '';
         if (authPassword) authPassword.value = '';
+        if (authMessage) authMessage.textContent = '';
         if (mainInput) mainInput.value = '';
         
         this.clearOutput();

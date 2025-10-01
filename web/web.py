@@ -153,7 +153,15 @@ async def upload(mcp_data: dict, user: dict = Depends(get_current_user)):
     db.add_memory(user_id, refined_data)
     return {"status": "uploaded"}
 
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
+# Mount frontend static files
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+app.mount("/static", StaticFiles(directory=os.path.join(frontend_dir, "static")), name="static")
+
+# Serve the main interface at root
+@app.get("/")
+async def root():
+    interface_path = os.path.join(frontend_dir, "components", "interface.html")
+    return FileResponse(interface_path)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8001)), reload=False)
