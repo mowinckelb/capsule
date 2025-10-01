@@ -11,6 +11,14 @@ from database.database import DBHandler
 from llm.llm import LLMHandler
 import sqlite3
 import uvicorn
+from contextlib import contextmanager
+
+try:
+    import psycopg2
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    POSTGRES_AVAILABLE = False
+    print("⚠️  psycopg2 not available, using SQLite fallback")
 
 try:
     handler = LLMHandler()
@@ -28,13 +36,60 @@ except Exception as e:
 
 app = FastAPI()
 
-# Initialize SQLite database for users
+# Database connection helper
+@contextmanager
+def get_db_connection():
+    """Get database connection (PostgreSQL if available, SQLite fallback)"""
+    database_url = os.getenv('DATABASE_URL')
+    
+    if database_url and database_url.startswith('postgresql') and POSTGRES_AVAILABLE:
+        # Use PostgreSQL
+        conn = psycopg2.connect(database_url)
+        try:
+            yield conn
+        finally:
+            conn.close()
+    else:
+        # Fallback to SQLite for local development
+        conn = sqlite3.connect("users.db")
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+def is_postgres():
+    """Check if using PostgreSQL"""
+    database_url = os.getenv('DATABASE_URL')
+    return database_url and database_url.startswith('postgresql') and POSTGRES_AVAILABLE
+
+# Initialize database for users
 def init_user_db():
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, hashed_password TEXT)")
-    conn.commit()
-    conn.close()
+    database_url = os.getenv('DATABASE_URL')
+    
+    if database_url and database_url.startswith('postgresql') and POSTGRES_AVAILABLE:
+        # PostgreSQL initialization
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS users (
+                            user_id TEXT PRIMARY KEY,
+                            hashed_password TEXT NOT NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+                    conn.commit()
+            print("✓ PostgreSQL users table initialized")
+        except Exception as e:
+            print(f"✗ PostgreSQL initialization failed: {e}")
+    else:
+        # SQLite initialization
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, hashed_password TEXT)")
+        conn.commit()
+        conn.close()
+        print("✓ SQLite users database initialized (local fallback)")
 
 # Initialize database on startup
 init_user_db()
@@ -45,47 +100,60 @@ print(f"GROK_API_KEY: {'Set' if os.getenv('GROK_API_KEY') else 'Not set'}")
 print(f"PINECONE_API_KEY: {'Set' if os.getenv('PINECONE_API_KEY') else 'Not set'}")
 print(f"DEFAULT_PROVIDER: {os.getenv('DEFAULT_PROVIDER', 'grok')}")
 print(f"DEFAULT_DB_PROVIDER: {os.getenv('DEFAULT_DB_PROVIDER', 'pinecone')}")
+print(f"DATABASE_URL: {'Set (PostgreSQL)' if os.getenv('DATABASE_URL') else 'Not set (SQLite)'}")
+print(f"Using database: {'PostgreSQL' if is_postgres() else 'SQLite'}")
 print("=====================================")
+
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (token,))
-    user = cursor.fetchone()
-    conn.close()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        placeholder = "%s" if is_postgres() else "?"
+        cursor.execute(f"SELECT user_id FROM users WHERE user_id = {placeholder}", (token,))
+        user = cursor.fetchone()
+        
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    
     return {"user_id": user[0]}
 
 @app.post("/register")
 async def register(user_id: str = Form(), password: str = Form()):
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, hashed_password TEXT)")
-    cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
-    if cursor.fetchone():
-        conn.close()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user already exists")
-    hashed_password = pwd_context.hash(password)
-    cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (?, ?)", (user_id, hashed_password))
-    conn.commit()
-    conn.close()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        placeholder = "%s" if is_postgres() else "?"
+        
+        # Check if user exists
+        cursor.execute(f"SELECT user_id FROM users WHERE user_id = {placeholder}", (user_id,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user already exists")
+        
+        # Hash password and insert
+        hashed_password = pwd_context.hash(password)
+        cursor.execute(f"INSERT INTO users (user_id, hashed_password) VALUES ({placeholder}, {placeholder})", (user_id, hashed_password))
+        conn.commit()
+        
     return {"status": "registered"}
 
 @app.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT hashed_password FROM users WHERE user_id = ?", (form_data.username,))
-    user = cursor.fetchone()
-    conn.close()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        placeholder = "%s" if is_postgres() else "?"
+        cursor.execute(f"SELECT hashed_password FROM users WHERE user_id = {placeholder}", (form_data.username,))
+        user = cursor.fetchone()
+        
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="user not found")
-    if not pwd_context.verify(form_data.password, user[0]):
+    
+    hashed_password = user[0]
+    
+    if not pwd_context.verify(form_data.password, hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="wrong password")
+    
     return {"access_token": form_data.username, "token_type": "bearer"}
 
 @app.post("/add")
