@@ -302,26 +302,38 @@ class CapsuleApp {
 let app;
 
 function switchAuthMode(mode) {
+    if (!app) { console.error('App not initialized'); return; }
     app.switchAuthMode(mode);
 }
 
 function register() {
+    if (!app) { console.error('App not initialized'); return; }
     app.register();
 }
 
 function login() {
+    if (!app) { console.error('App not initialized'); return; }
     app.login();
 }
 
 function logout() {
+    if (!app) { console.error('App not initialized'); return; }
     app.logout();
 }
 
 function setMode(mode) {
+    if (!app) { console.error('App not initialized'); return; }
     app.setMode(mode);
 }
 
-// initialize
-document.addEventListener('DOMContentLoaded', () => {
+// initialize immediately
+if (typeof CapsuleApp !== 'undefined') {
     app = new CapsuleApp();
+}
+
+// also on DOMContentLoaded as backup
+document.addEventListener('DOMContentLoaded', () => {
+    if (!app) {
+        app = new CapsuleApp();
+    }
 });
