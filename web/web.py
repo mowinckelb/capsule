@@ -68,8 +68,8 @@ async def register(user_id: str = Form(), password: str = Form()):
     cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
     if cursor.fetchone():
         conn.close()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User ID exists")
-    hashed_password = pwd_context.hash(password.encode('utf-8')[:72].decode('utf-8', errors='ignore'))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user already exists")
+    hashed_password = pwd_context.hash(password)
     cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (?, ?)", (user_id, hashed_password))
     conn.commit()
     conn.close()
@@ -82,8 +82,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     cursor.execute("SELECT hashed_password FROM users WHERE user_id = ?", (form_data.username,))
     user = cursor.fetchone()
     conn.close()
-    if not user or not pwd_context.verify(form_data.password.encode('utf-8')[:72].decode('utf-8', errors='ignore'), user[0]):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong password")
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="user not found")
+    if not pwd_context.verify(form_data.password, user[0]):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="wrong password")
     return {"access_token": form_data.username, "token_type": "bearer"}
 
 @app.post("/add")
@@ -163,17 +165,23 @@ async def root():
     interface_path = os.path.join(frontend_dir, "components", "interface.html")
     return FileResponse(interface_path)
 
-# Get provider info
+# Get provider info (public endpoint, no auth required)
 @app.get("/providers")
 async def get_providers():
-    from llm.config import DEFAULT_PROVIDER, PROVIDERS
-    from database.config import DEFAULT_DB_PROVIDER
-    
-    llm_model = PROVIDERS[DEFAULT_PROVIDER]['model']
-    return {
-        "llm": llm_model,
-        "storage": DEFAULT_DB_PROVIDER
-    }
+    try:
+        from llm.config import DEFAULT_PROVIDER, PROVIDERS
+        from database.config import DEFAULT_DB_PROVIDER
+        
+        llm_model = PROVIDERS.get(DEFAULT_PROVIDER, {}).get('model', 'unknown')
+        return {
+            "llm": llm_model,
+            "storage": DEFAULT_DB_PROVIDER
+        }
+    except Exception as e:
+        return {
+            "llm": "unknown",
+            "storage": "unknown"
+        }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8001)), reload=False)
