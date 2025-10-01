@@ -1,722 +1,308 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>capsule</title>
     <meta charset="UTF-8">
-    <title>Capsule – Personal Memory Console</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root {
-            --background: #f5f5f7;
-            --surface: rgba(255, 255, 255, 0.86);
-            --card: #ffffff;
-            --accent: #0a84ff;
-            --accent-soft: #cce4ff;
-            --text: #1c1c1e;
-            --muted: #6e6e73;
-            --border: #d2d2d7;
-            --shadow: 0 32px 80px -48px rgba(15, 23, 42, 0.45);
-        }
-
-        *, *::before, *::after {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background: radial-gradient(140% 120% at 50% 0%, #ffffff, #f0f2f5 52%, #e0e2eb 100%);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 48px 24px;
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #fff;
             line-height: 1.6;
-        }
-
-        .app-frame {
-            width: min(960px, 100%);
-            background: var(--surface);
-            backdrop-filter: blur(32px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: var(--shadow);
+            height: 100vh;
             overflow: hidden;
+        }
+        
+        .app-container {
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            padding: 2rem;
         }
-
-        .top-bar {
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: normal;
+            letter-spacing: 0.2em;
+        }
+        
+        /* User info bar */
+        .user-bar {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .user-bar button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+        
+        .user-bar button:hover {
+            opacity: 0.7;
+        }
+        
+        /* Output area */
+        .output-area {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 32px 40px 24px;
-            border-bottom: 1px solid rgba(210, 210, 215, 0.6);
-        }
-
-        .brand {
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand-mark {
-            display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(225, 225, 230, 0.6));
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            overflow-y: auto;
         }
-
-        .session-controls {
+        
+        .output-content {
+            max-width: 600px;
+            font-size: 1.2rem;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Input area */
+        .input-area {
+            padding: 2rem 0;
+            border-top: 1px solid #333;
+        }
+        
+        .input-controls {
             display: flex;
-            align-items: center;
-            gap: 16px;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
         }
-
-        .session-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
-            color: var(--muted);
+        
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
         }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #30d158;
-            box-shadow: 0 0 0 4px rgba(48, 209, 88, 0.18);
-        }
-
-        .ghost-button {
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 999px;
-            padding: 10px 20px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.8);
+        
+        .mode-btn {
+            background: none;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 1.5rem;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
-
-        .ghost-button:hover {
-            transform: translateY(-1px);
-            border-color: rgba(0, 0, 0, 0.16);
-            box-shadow: 0 12px 24px -18px rgba(0, 0, 0, 0.45);
+        
+        .mode-btn:hover {
+            border-color: #fff;
         }
-
-        .ghost-button:active {
-            transform: translateY(1px);
+        
+        .mode-btn.active {
+            background: #fff;
+            color: #000;
         }
-
-        .content {
-            padding: 36px 40px 48px;
+        
+        .input-wrapper {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
         }
-
+        
+        .input-box {
+            width: 100%;
+            background: #000;
+            border: none;
+            border-bottom: 2px solid #fff;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            padding: 1rem 0;
+            outline: none;
+            caret-color: #fff;
+            caret-width: thick;
+        }
+        
+        .input-box::placeholder {
+            color: #555;
+        }
+        
+        .status-message {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            min-height: 1.5rem;
+            opacity: 0.7;
+        }
+        
+        .thinking::after {
+            content: '';
+            animation: ellipsis 1.5s infinite;
+        }
+        
+        @keyframes ellipsis {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+        
+        /* Auth screen */
+        .auth-screen {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .auth-screen h1 {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            letter-spacing: 0.2em;
+        }
+        
+        .auth-form {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .auth-input {
+            width: 100%;
+            background: #000;
+            border: none;
+            border-bottom: 2px solid #fff;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            padding: 1rem 0;
+            margin-bottom: 1.5rem;
+            outline: none;
+        }
+        
+        .auth-input::placeholder {
+            color: #555;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: opacity 0.2s;
+        }
+        
+        .auth-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .auth-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .auth-link button {
+            background: none;
+            border: none;
+            color: #fff;
+            text-decoration: underline;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .auth-message {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
         .hidden {
             display: none !important;
-        }
-
-        .auth-card {
-            background: var(--card);
-            border-radius: 28px;
-            border: 1px solid rgba(210, 210, 215, 0.8);
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            box-shadow: 0 18px 48px -36px rgba(15, 23, 42, 0.4);
-        }
-
-        .headline {
-            font-size: 2.15rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-        }
-
-        .subline {
-            color: var(--muted);
-            font-size: 1rem;
-        }
-
-        .tab-container {
-            background: rgba(245, 245, 247, 0.9);
-            border-radius: 18px;
-            padding: 4px;
-            border: 1px solid rgba(210, 210, 215, 0.6);
-            width: fit-content;
-        }
-
-        .tabs {
-            display: inline-grid;
-            grid-template-columns: repeat(2, minmax(120px, 1fr));
-            background: transparent;
-        }
-
-        .tab {
-            position: relative;
-            padding: 10px 24px;
-            text-align: center;
-            border-radius: 14px;
-            font-weight: 500;
-            color: var(--muted);
-            cursor: pointer;
-            transition: color 0.3s ease, background 0.3s ease, transform 0.2s ease;
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #ffffff, rgba(231, 235, 255, 0.9));
-            color: var(--text);
-            box-shadow: 0 12px 20px -18px rgba(10, 132, 255, 0.45);
-        }
-
-        .tab:not(.active):hover {
-            color: var(--text);
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .input-group label {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--muted);
-            letter-spacing: 0.02em;
-        }
-
-        .input-group input {
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 16px;
-            padding: 14px 18px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.92);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.18);
-        }
-
-        .primary-button {
-            border: none;
-            border-radius: 18px;
-            padding: 14px 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #ffffff;
-            background: linear-gradient(135deg, #0a84ff, #5ac8fa);
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 18px 28px -18px rgba(10, 132, 255, 0.6);
-        }
-
-        .primary-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 24px 34px -20px rgba(10, 132, 255, 0.5);
-        }
-
-        .primary-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 12px 24px -18px rgba(10, 132, 255, 0.45);
-        }
-
-        .message-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .alert {
-            border-radius: 16px;
-            padding: 12px 16px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-success {
-            background: rgba(48, 209, 88, 0.12);
-            color: #2b9d4f;
-            border: 1px solid rgba(48, 209, 88, 0.25);
-        }
-
-        .alert-error {
-            background: rgba(255, 69, 58, 0.12);
-            color: #c43833;
-            border: 1px solid rgba(255, 69, 58, 0.25);
-        }
-
-        .alert-info {
-            background: rgba(10, 132, 255, 0.08);
-            color: var(--accent);
-            border: 1px solid rgba(10, 132, 255, 0.2);
-        }
-
-        .console-card {
-            background: var(--card);
-            border-radius: 28px;
-            border: 1px solid rgba(210, 210, 215, 0.6);
-            padding: 36px;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-            box-shadow: 0 20px 54px -40px rgba(15, 23, 42, 0.48);
-        }
-
-        .mode-switch {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .mode-caption {
-            font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .mode-toggle {
-            position: relative;
-            width: 184px;
-            height: 48px;
-            background: rgba(245, 245, 247, 0.9);
-            border-radius: 999px;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            cursor: pointer;
-            transition: background 0.3s ease;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0;
-            appearance: none;
-            -webkit-appearance: none;
-            color: inherit;
-        }
-
-        .mode-toggle:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.18);
-        }
-
-        .mode-toggle .toggle-thumb {
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            width: 82px;
-            height: 36px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #0a84ff, #5ac8fa);
-            box-shadow: 0 16px 32px -18px rgba(10, 132, 255, 0.55);
-            transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
-        }
-
-        .mode-toggle[data-mode="output"] .toggle-thumb {
-            transform: translateX(90px);
-        }
-
-        .mode-toggle .label {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--muted);
-            transition: color 0.3s ease;
-        }
-
-        .mode-toggle .label-input {
-            left: 26px;
-        }
-
-        .mode-toggle .label-output {
-            right: 24px;
-        }
-
-        .mode-toggle[data-mode="input"] .label-input,
-        .mode-toggle[data-mode="output"] .label-output {
-            color: #ffffff;
-        }
-
-        .console-pane {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .console-window {
-            border-radius: 24px;
-            border: 1px solid rgba(210, 210, 215, 0.7);
-            background: rgba(255, 255, 255, 0.94);
-            box-shadow: 0 18px 48px -36px rgba(15, 23, 42, 0.32);
-            overflow: hidden;
-            backdrop-filter: blur(24px);
-        }
-
-        .window-chrome {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 22px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 245, 247, 0.88));
-            border-bottom: 1px solid rgba(210, 210, 215, 0.6);
-        }
-
-        .window-controls {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .window-control {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12);
-        }
-
-        .window-control.red { background: linear-gradient(135deg, #ff5f57, #e64942); }
-        .window-control.yellow { background: linear-gradient(135deg, #fdbc2e, #e5a514); }
-        .window-control.green { background: linear-gradient(135deg, #28c840, #1faa33); }
-
-        .window-title {
-            font-size: 0.82rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .console-header h2 {
-            font-size: 1.45rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-        }
-
-        .console-header p {
-            color: var(--muted);
-            max-width: 460px;
-        }
-
-        .code-shell {
-            position: relative;
-            border-top: 1px solid rgba(0, 0, 0, 0.04);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(240, 240, 245, 0.9));
-            padding: 28px;
-            font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .code-shell::after {
-            content: '';
-            position: absolute;
-            top: 32px;
-            left: 30px;
-            width: 2px;
-            height: 22px;
-            background: var(--accent);
-            animation: cursor-blink 1s steps(1) infinite;
-            opacity: 0.65;
-            pointer-events: none;
-        }
-
-        .code-shell:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 6px rgba(10, 132, 255, 0.16);
-        }
-
-        .code-shell:focus-within::after {
-            opacity: 0;
-        }
-
-        .code-area {
-            width: 100%;
-            min-height: 180px;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: var(--text);
-            font: inherit;
-            resize: none;
-            line-height: 1.7;
-            caret-color: var(--accent);
-            padding-left: 12px;
-        }
-
-        .code-area::placeholder {
-            color: rgba(108, 112, 122, 0.65);
-        }
-
-        .action-row {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .query-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .query-bar input {
-            flex: 1 1 280px;
-            border-radius: 18px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            padding: 14px 18px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.92);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .query-bar input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.18);
-        }
-
-        .console-output {
-            min-height: 220px;
-            border-top: 1px solid rgba(0, 0, 0, 0.04);
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(235, 236, 240, 0.92));
-            padding: 28px;
-            font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-            font-size: 0.98rem;
-            line-height: 1.75;
-            color: var(--text);
-            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.45);
-            word-break: break-word;
-        }
-
-        .console-output strong {
-            color: #111135;
-        }
-
-        .muted-state {
-            color: var(--muted);
-            opacity: 0.75;
-        }
-
-        .thinking {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-            font-size: 0.95rem;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .thinking .label {
-            font-weight: 500;
-        }
-
-        .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            animation: dot-bounce 1.4s infinite;
-        }
-
-        .dot:nth-of-type(2) {
-            animation-delay: 0.2s;
-        }
-
-        .dot:nth-of-type(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes cursor-blink {
-            0%, 50% { opacity: 0.65; }
-            51%, 100% { opacity: 0; }
-        }
-
-        @keyframes dot-bounce {
-            0%, 80%, 100% {
-                transform: translateY(0);
-                opacity: 0.3;
-            }
-            40% {
-                transform: translateY(-6px);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 720px) {
-            body {
-                padding: 24px;
-            }
-
-            .app-frame {
-                border-radius: 24px;
-            }
-
-            .top-bar, .content {
-                padding: 28px 24px;
-            }
-
-            .auth-card, .console-card {
-                padding: 28px;
-            }
-
-            .mode-switch {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 18px;
-            }
-
-            .action-row {
-                justify-content: stretch;
-            }
-
-            .query-bar {
-                flex-direction: column;
-            }
-
-            .query-bar input,
-            .query-bar button {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="app-frame">
-        <div class="top-bar">
-            <div class="brand">
-                <span class="brand-mark">◦</span>
-                Capsule
-            </div>
-            <div class="session-controls hidden" id="session-controls">
-                <span class="session-status">
-                    <span class="status-dot"></span>
-                    <span id="user-name"></span>
-                </span>
-                <button class="ghost-button" onclick="logout()">Sign out</button>
-            </div>
-        </div>
-
-        <div id="auth-section" class="content">
-            <div class="auth-card">
-                <h1 class="headline">Welcome back</h1>
-                <p class="subline">Sign in to access your personal memory console.</p>
-                <div class="tab-container">
-                    <div class="tabs">
-                        <div class="tab active" onclick="switchTab('login')">Login</div>
-                        <div class="tab" onclick="switchTab('register')">Register</div>
-                    </div>
-                </div>
-                <div id="auth-message" class="message-stack"></div>
-                <div id="login-form">
-                    <div class="input-group">
-                        <label for="login-user">User ID</label>
-                        <input type="text" id="login-user" placeholder="you@email.com">
-                    </div>
-                    <div class="input-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" placeholder="••••••••">
-                    </div>
-                    <button class="primary-button" onclick="login()">Continue</button>
-                </div>
-                <div id="register-form" class="hidden">
-                    <div class="input-group">
-                        <label for="register-user">User ID</label>
-                        <input type="text" id="register-user" placeholder="Choose a user ID">
-                    </div>
-                    <div class="input-group">
-                        <label for="register-password">Password</label>
-                        <input type="password" id="register-password" placeholder="Create a password">
-                    </div>
-                    <button class="primary-button" onclick="register()">Create account</button>
-                </div>
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="auth-screen">
+        <h1>capsule</h1>
+        
+        <div id="login-form" class="auth-form">
+            <input type="text" id="login-user" class="auth-input" placeholder="username">
+            <input type="password" id="login-password" class="auth-input" placeholder="password">
+            <button class="auth-btn" onclick="login()">sign in</button>
+            <div class="auth-link">
+                <span>need an account?</span>
+                <button onclick="switchAuthMode('register')">register</button>
             </div>
         </div>
-
-        <div id="app-section" class="content hidden">
-            <div class="console-card">
-                <div class="mode-switch">
-                    <div class="mode-caption">Workspace</div>
-                    <button class="mode-toggle" id="mode-toggle" data-mode="input" type="button" onclick="toggleMode()" role="switch" aria-checked="false" aria-label="Switch workspace to output mode">
-                        <span class="toggle-thumb"></span>
-                        <span class="label label-input">Input</span>
-                        <span class="label label-output">Output</span>
-                    </button>
+        
+        <div id="register-form" class="auth-form hidden">
+            <input type="text" id="register-user" class="auth-input" placeholder="choose username">
+            <input type="password" id="register-password" class="auth-input" placeholder="choose password">
+            <button class="auth-btn" onclick="register()">create account</button>
+            <div class="auth-link">
+                <span>already have an account?</span>
+                <button onclick="switchAuthMode('login')">sign in</button>
+            </div>
+        </div>
+        
+        <div id="auth-message" class="auth-message"></div>
+    </div>
+    
+    <!-- Main App -->
+    <div id="app-screen" class="app-container hidden">
+        <div class="header">
+            <h1>capsule</h1>
+        </div>
+        
+        <div class="user-bar">
+            <span id="user-name"></span>
+            <button onclick="logout()">sign out</button>
+        </div>
+        
+        <div class="output-area">
+            <div id="output-content" class="output-content">
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="input-controls">
+                <div class="mode-toggle">
+                    <button id="input-mode" class="mode-btn active" onclick="setMode('input')">input</button>
+                    <button id="output-mode" class="mode-btn" onclick="setMode('output')">output</button>
                 </div>
-
-                <div id="input-pane" class="console-pane">
-                    <div class="console-header">
-                        <h2>Capture memory</h2>
-                        <p>Write in your own words. I will file it so you can recall it later.</p>
-                    </div>
-                    <div class="console-window" aria-label="Memory capture console">
-                        <div class="window-chrome">
-                            <div class="window-controls" aria-hidden="true">
-                                <span class="window-control red"></span>
-                                <span class="window-control yellow"></span>
-                                <span class="window-control green"></span>
-                            </div>
-                            <span class="window-title">Composer</span>
-                        </div>
-                        <div class="code-shell">
-                            <textarea id="memory-input" class="code-area" rows="7" placeholder="You saved a note about meeting with Nina at 10:30..." spellcheck="false"></textarea>
-                        </div>
-                    </div>
-                    <div class="action-row">
-                        <button class="ghost-button" onclick="document.getElementById('memory-input').focus()">Focus input</button>
-                        <button class="primary-button" onclick="addMemory()">Save memory</button>
-                    </div>
-                    <div id="add-message" class="message-stack"></div>
-                </div>
-
-                <div id="output-pane" class="console-pane hidden">
-                    <div class="console-header">
-                        <h2>Recall memory</h2>
-                        <p>Ask me about what you have stored and I will respond to you in the second person.</p>
-                    </div>
-                    <div class="query-bar">
-                        <input type="text" id="query-input" placeholder="What did I promise the team last week?" onkeypress="handleQueryKeypress(event)">
-                        <button class="primary-button" onclick="queryMemories()">Ask Capsule</button>
-                    </div>
-                    <div id="loading-indicator" class="thinking hidden" aria-live="polite">
-                        <span class="label">thinking</span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </div>
-                    <div class="console-window" aria-live="polite">
-                        <div class="window-chrome">
-                            <div class="window-controls" aria-hidden="true">
-                                <span class="window-control red"></span>
-                                <span class="window-control yellow"></span>
-                                <span class="window-control green"></span>
-                            </div>
-                            <span class="window-title">Recall</span>
-                        </div>
-                        <div id="query-results" class="console-output muted-state">Your answers will appear here once you ask a question.</div>
-                    </div>
-                </div>
+            </div>
+            
+            <div class="input-wrapper">
+                <input type="text" id="main-input" class="input-box" placeholder="type here..." autocomplete="off">
+                <div id="status-message" class="status-message"></div>
             </div>
         </div>
     </div>

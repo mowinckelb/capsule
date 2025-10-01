@@ -1,6 +1,7 @@
 import os
 import uuid
 import logging
+from datetime import datetime
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
@@ -51,16 +52,26 @@ class DBHandler:
     def add_memory(self, user_id: str, memory: str | dict):
         if self.provider == 'pinecone':
             index = self.get_index()
+            timestamp = datetime.now().isoformat()
+            
             if isinstance(memory, dict):
                 content = str(memory.get('content', memory.get('summary', '')))
                 if not content:
                     content = ' '
                 vector = self.model.encode(content).tolist()
-                metadata = {'memory': content, 'summary': memory.get('summary', ''), 'tags': memory.get('tags', [])}
+                metadata = {
+                    'memory': content,
+                    'summary': memory.get('summary', ''),
+                    'tags': memory.get('tags', []),
+                    'timestamp': timestamp
+                }
             else:
                 content = str(memory) if memory else ' '
                 vector = self.model.encode(content).tolist()
-                metadata = {"memory": content}
+                metadata = {
+                    "memory": content,
+                    "timestamp": timestamp
+                }
             index.upsert(vectors=[(f"id_{user_id}_{uuid.uuid4()}", vector, metadata)], namespace=user_id)
         else:
             raise NotImplementedError(f"add_memory not implemented for '{self.provider}'")
