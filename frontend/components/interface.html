@@ -187,6 +187,8 @@
             margin-bottom: 2rem;
             opacity: 0.55;
             font-size: 0.85rem;
+            position: relative;
+            z-index: 10;
         }
         
         .header-left {
@@ -199,6 +201,22 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .header-center {
+                position: static;
+                transform: none;
+                order: -1;
+                margin-bottom: 0.25rem;
+            }
         }
         
         .header-item {
@@ -259,6 +277,11 @@
             border-radius: 12px;
             padding: 2px;
             display: inline-flex;
+            outline: none;
+        }
+        
+        .toggle-container:focus {
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
         }
         
         .toggle-btn {
