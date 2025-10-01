@@ -1,5 +1,8 @@
 # Database Module
 
+## Executive Summary
+**What**: Vector database integration (Pinecone) for memory storage with timestamps. **Why**: Enable semantic search of user memories with temporal context. **Agent Instructions**: Always add timestamps to memories, use lazy-loaded model/index for performance, sync with develop before PRs.
+
 This is a **self-contained database module** that can be developed and tested independently.
 
 ## 📁 Structure

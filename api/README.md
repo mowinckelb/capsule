@@ -1,5 +1,8 @@
 # API Module
 
+## Executive Summary
+**What**: FastAPI REST endpoints for authentication, memory storage, and querying. **Why**: Unified API layer for all client interactions. **Agent Instructions**: Use dependency injection, mock unavailable services gracefully, test all endpoints before PRs.
+
 This is a **self-contained API module** that can be developed and tested independently.
 
 ## 📁 Structure

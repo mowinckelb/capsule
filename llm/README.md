@@ -1,5 +1,8 @@
 # LLM Module
 
+## Executive Summary
+**What**: LLM integration (Grok) for processing memories and queries into structured data. **Why**: Convert natural language to searchable embeddings and generate responses. **Agent Instructions**: Handle API failures gracefully, validate JSON responses, use mocks for testing.
+
 This is a **self-contained LLM module** that can be developed and tested independently.
 
 ## 📁 Structure
