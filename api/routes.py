@@ -243,7 +243,18 @@ class APIRoutes:
                 return {"users": users}
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
-        
+
+        @self.app.get("/providers")
+        async def get_providers():
+            """Get LLM and storage provider info"""
+            try:
+                from llm.config import DEFAULT_PROVIDER, PROVIDERS
+                from database.config import DEFAULT_DB_PROVIDER
+                llm_model = PROVIDERS.get(DEFAULT_PROVIDER, {}).get('model', 'unknown')
+                return {"llm": llm_model, "storage": DEFAULT_DB_PROVIDER}
+            except:
+                return {"llm": "unknown", "storage": "unknown"}
+
         # Mount static files (for web interface)
         if API_CONFIG['serve_static']:
             try:
