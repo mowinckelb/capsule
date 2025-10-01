@@ -147,16 +147,22 @@
             transform: translateY(-50%) scaleY(0.8);
             background: none;
             border: none;
+            border-radius: 6px;
             color: #ccc;
             font-size: 1rem;
             cursor: pointer;
             padding: 4px 8px;
-            transition: color 0.2s ease;
+            transition: color 0.2s ease, box-shadow 0.2s ease;
             outline: none;
         }
         
         .auth-submit-arrow:hover {
             color: #999;
+        }
+        
+        .auth-submit-arrow:focus {
+            color: #999;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
         }
 
         
@@ -344,16 +350,22 @@
             transform: translateY(-50%) scaleY(0.8);
             background: none;
             border: none;
+            border-radius: 6px;
             color: #ccc;
             font-size: 1.2rem;
             cursor: pointer;
             padding: 4px 8px;
-            transition: color 0.2s ease;
+            transition: color 0.2s ease, box-shadow 0.2s ease;
             outline: none;
         }
         
         .submit-arrow:hover {
             color: #999;
+        }
+        
+        .submit-arrow:focus {
+            color: #999;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
         }
         
         .status-message {

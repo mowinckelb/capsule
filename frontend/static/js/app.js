@@ -136,13 +136,20 @@ class CapsuleApp {
     
     async loadProviders() {
         try {
-            const data = await this.makeRequest('/providers');
+            // Use fetch directly since /providers is a public endpoint
+            const response = await fetch(`${this.api_base}/providers`);
+            const data = await response.json();
             const llmProvider = document.getElementById('llm-provider');
             const storageProvider = document.getElementById('storage-provider');
             if (llmProvider) llmProvider.textContent = data.llm;
             if (storageProvider) storageProvider.textContent = data.storage;
         } catch (error) {
             console.error('Failed to load providers:', error);
+            // Set fallback values
+            const llmProvider = document.getElementById('llm-provider');
+            const storageProvider = document.getElementById('storage-provider');
+            if (llmProvider) llmProvider.textContent = 'unknown';
+            if (storageProvider) storageProvider.textContent = 'unknown';
         }
     }
     
