@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 from datetime import datetime
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
@@ -7,8 +8,11 @@ from sentence_transformers import SentenceTransformer
 from config.providers import DATABASE_PROVIDERS as DB_PROVIDERS, DEFAULT_DATABASE_PROVIDER as DEFAULT_DB_PROVIDER
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 class DBHandler:
+    _model = None
+    
     def __init__(self, provider: str = DEFAULT_DB_PROVIDER):
         self.provider = provider
         if provider not in DB_PROVIDERS:
@@ -19,20 +23,29 @@ class DBHandler:
             if not api_key:
                 raise ValueError(f"No {provider_config['api_key_env']}")
             self.pc = Pinecone(api_key=api_key)
-            self.model = SentenceTransformer('all-MiniLM-L6-v2')
             self.index_name = provider_config['index_name']
             self.dimension = provider_config['dimension']
             self.metric = provider_config['metric']
             self.spec = ServerlessSpec(cloud=provider_config['cloud'], region=provider_config['region'])
+            self._index = None
         else:
+            # TODO: Add new provider setup here, e.g., elif provider == 'chroma': self.client = chromadb.Client(provider_config['path'])
             raise NotImplementedError(f"Provider '{provider}' not implemented yet—add in __init__ using provider_config")
+
+    @property
+    def model(self):
+        if DBHandler._model is None:
+            DBHandler._model = SentenceTransformer('all-MiniLM-L6-v2')
+        return DBHandler._model
 
     def get_index(self):
         if self.provider == 'pinecone':
-            index_name = self.index_name
-            if index_name not in self.pc.list_indexes().names():
-                self.pc.create_index(name=index_name, dimension=self.dimension, metric=self.metric, spec=self.spec)
-            return self.pc.Index(index_name)
+            if self._index is None:
+                index_name = self.index_name
+                if index_name not in self.pc.list_indexes().names():
+                    self.pc.create_index(name=index_name, dimension=self.dimension, metric=self.metric, spec=self.spec)
+                self._index = self.pc.Index(index_name)
+            return self._index
         else:
             raise NotImplementedError(f"get_index not implemented for '{self.provider}'")
 
@@ -42,41 +55,41 @@ class DBHandler:
             timestamp = datetime.now().isoformat()
             
             if isinstance(memory, dict):
-                content = memory.get('content', memory)
-                content = str(content) if not isinstance(content, str) else content
+                content = str(memory.get('content', memory.get('summary', '')))
                 if not content:
-                    content = ''
+                    content = ' '
                 vector = self.model.encode(content).tolist()
                 metadata = {
+                    'memory': content,
                     'summary': memory.get('summary', ''),
                     'tags': memory.get('tags', []),
                     'timestamp': timestamp
                 }
             else:
-                content = memory
-                content = str(content) if not isinstance(content, str) else content
-                if not content:
-                    content = ''
-                vector = self.model.encode(memory).tolist()
+                content = str(memory) if memory else ' '
+                vector = self.model.encode(content).tolist()
                 metadata = {
-                    "memory": memory,
+                    "memory": content,
                     "timestamp": timestamp
                 }
             index.upsert(vectors=[(f"id_{user_id}_{uuid.uuid4()}", vector, metadata)], namespace=user_id)
         else:
             raise NotImplementedError(f"add_memory not implemented for '{self.provider}'")
 
-    def query_memories(self, user_id: str, query_text: str | dict):
+    def query_memories(self, user_id: str, query_text: str | dict, top_k: int = 5):
         if self.provider == 'pinecone':
             index = self.get_index()
             
             if isinstance(query_text, dict):
-                text_content = query_text.get('summary', query_text.get('content', str(query_text)))
+                text_content = str(query_text.get('summary', query_text.get('content', str(query_text))))
             else:
                 text_content = str(query_text)
             
+            if not text_content:
+                text_content = ' '
+            
             query_vector = self.model.encode(text_content).tolist()
-            results = index.query(vector=query_vector, top_k=5, include_metadata=True, namespace=user_id)
+            results = index.query(vector=query_vector, top_k=top_k, include_metadata=True, namespace=user_id)
             if not results or not hasattr(results, 'matches') or not results.matches:
                 return []
             return [match.metadata.get("memory", match.metadata.get("summary", "")) for match in results.matches if match.metadata]

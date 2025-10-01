@@ -10,11 +10,11 @@ import unittest
 from unittest.mock import Mock, patch
 
 # Add current directory to path for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database import DBHandler
-from interface import database_service
-from config import DB_PROVIDERS
+from database.database import DBHandler
+from database.interface import database_service
+from config.providers import DATABASE_PROVIDERS as DB_PROVIDERS
 
 
 class TestDatabaseModule(unittest.TestCase):
@@ -34,8 +34,8 @@ class TestDatabaseModule(unittest.TestCase):
         self.assertTrue(hasattr(database_service, 'health_check'))
     
     @patch.dict(os.environ, {'PINECONE_API_KEY': 'test_key'})
-    @patch('database.Pinecone')
-    @patch('database.SentenceTransformer')
+    @patch('database.database.Pinecone')
+    @patch('database.database.SentenceTransformer')
     def test_db_handler_initialization(self, mock_transformer, mock_pinecone):
         """Test DBHandler initialization with mocks"""
         # Mock the dependencies
@@ -55,8 +55,8 @@ class TestDatabaseModule(unittest.TestCase):
             self.fail(f"DBHandler initialization failed: {e}")
     
     @patch.dict(os.environ, {'PINECONE_API_KEY': 'test_key'})
-    @patch('database.Pinecone')
-    @patch('database.SentenceTransformer')
+    @patch('database.database.Pinecone')
+    @patch('database.database.SentenceTransformer')
     def test_add_memory_string(self, mock_transformer, mock_pinecone):
         """Test adding string memory"""
         # Setup mocks
@@ -78,8 +78,8 @@ class TestDatabaseModule(unittest.TestCase):
             self.fail(f"add_memory failed: {e}")
     
     @patch.dict(os.environ, {'PINECONE_API_KEY': 'test_key'})
-    @patch('database.Pinecone')
-    @patch('database.SentenceTransformer')
+    @patch('database.database.Pinecone')
+    @patch('database.database.SentenceTransformer')
     def test_query_memories(self, mock_transformer, mock_pinecone):
         """Test querying memories"""
         # Setup mocks
@@ -160,10 +160,10 @@ def run_all_tests():
     # Print summary
     print("\n" + "=" * 60)
     if result.wasSuccessful():
-        print("✅ ALL DATABASE MODULE TESTS PASSED!")
+        print("[SUCCESS] ALL DATABASE MODULE TESTS PASSED!")
         print("Database module is ready for merge to develop branch.")
     else:
-        print(f"❌ {len(result.failures)} FAILURE(S), {len(result.errors)} ERROR(S)")
+        print(f"[FAILED] {len(result.failures)} FAILURE(S), {len(result.errors)} ERROR(S)")
         print("Fix issues before merging to develop branch.")
     print("=" * 60)
     
