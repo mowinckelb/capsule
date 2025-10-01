@@ -16,4 +16,4 @@ from .interface import llm_service
 # Export the main service
 __all__ = ['llm_service']
 
-print("✅ LLM module loaded successfully")
+print("LLM module loaded successfully")
