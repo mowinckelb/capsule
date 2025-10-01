@@ -1,5 +1,8 @@
 # Frontend Module
 
+## Executive Summary
+**What**: Minimal monochrome web interface (black/white, Courier New, lowercase). **Why**: Clean, distraction-free UX for memory interaction. **Agent Instructions**: Maintain monochrome aesthetic, all text lowercase, use input/output mode toggle, show "thinking..." animation, test UI locally before PRs.
+
 This is a **self-contained frontend module** that contains all UI components and static files.
 
 ## 📁 Structure

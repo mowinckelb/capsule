@@ -1,5 +1,8 @@
 # Agents Overview
 
+## Executive Summary
+AI agents working on Capsule must: follow modular development in feature branches, sync with develop regularly (see `BRANCHING.md`), capture learnings in `lessons.md`, test locally before pushing, use lowercase/monochrome aesthetic for UX, and add timestamps to all data operations.
+
 ## Purpose
 This repository coordinates multiple service-specific components (`api`, `authentication`, `chat`, `config`, `database`, `frontend`, `llm`, and `web`) to deliver the Capsule AI experience. The `agents.md` document captures high-level guidance for defining and maintaining the conversational agents that interact with these services.
 
