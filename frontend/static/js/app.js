@@ -61,6 +61,30 @@ class CapsuleApp {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     this.handleSubmit();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const toggleContainer = document.getElementById('toggle-container');
+                    if (toggleContainer) toggleContainer.focus();
+                }
+            });
+        }
+        
+        // Toggle container navigation
+        const toggleContainer = document.getElementById('toggle-container');
+        if (toggleContainer) {
+            toggleContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (mainInput) mainInput.focus();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.setMode('input');
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.setMode('output');
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (mainInput) mainInput.focus();
                 }
             });
         }

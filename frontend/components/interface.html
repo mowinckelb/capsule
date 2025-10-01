@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             background: #fafafa;
             color: #1a1a1a;
             line-height: 1.6;
@@ -60,7 +60,7 @@
             background: transparent;
             border: none;
             padding: 4px 16px;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 0.85rem;
             color: #666;
             cursor: pointer;
@@ -101,7 +101,7 @@
             border: none;
             border-radius: 12px;
             padding: 14px 18px;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 1.05rem;
             color: #1a1a1a;
             width: 100%;
@@ -126,15 +126,6 @@
             }
         }
         
-        @keyframes blink {
-            0%, 70% { opacity: 1; }
-            71%, 100% { opacity: 0; }
-        }
-        
-        .input-bubble {
-            animation: blink 1.8s infinite;
-        }
-        
         .auth-btn {
             width: 100%;
             background: #d8d8d8;
@@ -142,7 +133,7 @@
             border: none;
             border-radius: 12px;
             padding: 14px;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 1.05rem;
             cursor: pointer;
             margin-top: 8px;
@@ -196,7 +187,7 @@
         .header-item {
             background: none;
             border: none;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 0.85rem;
             color: #1a1a1a;
             cursor: pointer;
@@ -241,7 +232,6 @@
             display: flex;
             justify-content: flex-start;
             margin-bottom: 1rem;
-            padding-left: 20px;
         }
         
         .toggle-container {
@@ -250,6 +240,13 @@
             border-radius: 12px;
             padding: 2px;
             display: inline-flex;
+            outline: none;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+        
+        .toggle-container:focus {
+            border-color: #999;
         }
         
         .toggle-btn {
@@ -257,12 +254,13 @@
             background: transparent;
             border: none;
             padding: 4px 16px;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 0.85rem;
             color: #666;
             cursor: pointer;
             transition: color 0.3s ease;
             z-index: 2;
+            outline: none;
         }
         
         .toggle-btn.active {
@@ -299,7 +297,7 @@
             border: none;
             border-radius: 16px;
             color: #1a1a1a;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 1.1rem;
             padding: 16px 20px;
             outline: none;
@@ -312,10 +310,6 @@
             .input-box {
                 caret-width: 8px;
             }
-        }
-        
-        .input-box {
-            animation: blink 1.8s infinite;
         }
         
         .input-box:focus {
@@ -412,15 +406,15 @@
         </div>
         
         <div class="input-area">
-            <div class="mode-toggle">
-                <div class="toggle-container">
-                    <button class="toggle-btn active" id="input-mode-btn" onclick="setMode('input')">input</button>
-                    <button class="toggle-btn" id="output-mode-btn" onclick="setMode('output')">output</button>
-                    <div class="toggle-slider" id="mode-slider"></div>
-                </div>
-            </div>
-            
             <div class="input-wrapper">
+                <div class="mode-toggle">
+                    <div class="toggle-container" id="toggle-container" tabindex="0">
+                        <button class="toggle-btn active" id="input-mode-btn" onclick="setMode('input')">input</button>
+                        <button class="toggle-btn" id="output-mode-btn" onclick="setMode('output')">output</button>
+                        <div class="toggle-slider" id="mode-slider"></div>
+                    </div>
+                </div>
+                
                 <input type="text" id="main-input" class="input-box" autocomplete="off">
                 <div id="status-message" class="status-message"></div>
             </div>
