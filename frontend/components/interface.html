@@ -120,10 +120,14 @@
             background: #e8e8e8;
         }
         
-        @supports (caret-width: 8px) {
+        @supports (caret-width: 2px) {
             .input-bubble {
-                caret-width: 8px;
+                caret-width: 2px;
             }
+        }
+        
+        .input-bubble {
+            caret-color: rgba(26, 26, 26, 0.4);
         }
         
         .auth-btn {
@@ -240,13 +244,6 @@
             border-radius: 12px;
             padding: 2px;
             display: inline-flex;
-            outline: none;
-            border: 2px solid transparent;
-            transition: border-color 0.2s ease;
-        }
-        
-        .toggle-container:focus {
-            border-color: #999;
         }
         
         .toggle-btn {
@@ -306,10 +303,14 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
         
-        @supports (caret-width: 8px) {
+        @supports (caret-width: 2px) {
             .input-box {
-                caret-width: 8px;
+                caret-width: 2px;
             }
+        }
+        
+        .input-box {
+            caret-color: rgba(26, 26, 26, 0.4);
         }
         
         .input-box:focus {
@@ -408,14 +409,14 @@
         <div class="input-area">
             <div class="input-wrapper">
                 <div class="mode-toggle">
-                    <div class="toggle-container" id="toggle-container" tabindex="0">
-                        <button class="toggle-btn active" id="input-mode-btn" onclick="setMode('input')">input</button>
-                        <button class="toggle-btn" id="output-mode-btn" onclick="setMode('output')">output</button>
+                    <div class="toggle-container" id="toggle-container" tabindex="-1">
+                        <button class="toggle-btn active" id="input-mode-btn" onclick="setMode('input')" tabindex="-1">input</button>
+                        <button class="toggle-btn" id="output-mode-btn" onclick="setMode('output')" tabindex="-1">output</button>
                         <div class="toggle-slider" id="mode-slider"></div>
                     </div>
                 </div>
                 
-                <input type="text" id="main-input" class="input-box" autocomplete="off">
+                <input type="text" id="main-input" class="input-box" autocomplete="off" tabindex="0">
                 <div id="status-message" class="status-message"></div>
             </div>
         </div>
