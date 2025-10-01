@@ -13,6 +13,15 @@ class CapsuleApp {
     }
     
     init() {
+        // Wait for DOM to be ready before accessing elements
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initAfterDOM());
+        } else {
+            this.initAfterDOM();
+        }
+    }
+    
+    initAfterDOM() {
         if (this.token && this.user_id) {
             this.showApp();
         } else {
@@ -326,14 +335,5 @@ function setMode(mode) {
     app.setMode(mode);
 }
 
-// initialize immediately
-if (typeof CapsuleApp !== 'undefined') {
-    app = new CapsuleApp();
-}
-
-// also on DOMContentLoaded as backup
-document.addEventListener('DOMContentLoaded', () => {
-    if (!app) {
-        app = new CapsuleApp();
-    }
-});
+// initialize when script loads
+app = new CapsuleApp();
