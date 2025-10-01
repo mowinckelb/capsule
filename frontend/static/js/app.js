@@ -71,6 +71,12 @@ class CapsuleApp {
         const appScreen = document.getElementById('app-screen');
         if (authScreen) authScreen.classList.remove('hidden');
         if (appScreen) appScreen.classList.add('hidden');
+        
+        // Auto-focus username field
+        setTimeout(() => {
+            const authUsername = document.getElementById('auth-username');
+            if (authUsername) authUsername.focus();
+        }, 100);
     }
     
     showApp() {

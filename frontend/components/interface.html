@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-family: 'Courier New', monospace;
             background: #fafafa;
             color: #1a1a1a;
             line-height: 1.6;
@@ -49,8 +49,8 @@
         .auth-toggle {
             position: relative;
             background: rgba(0, 0, 0, 0.06);
-            border-radius: 14px;
-            padding: 3px;
+            border-radius: 12px;
+            padding: 2px;
             display: inline-flex;
             margin-bottom: 1.5rem;
         }
@@ -59,9 +59,9 @@
             position: relative;
             background: transparent;
             border: none;
-            padding: 6px 20px;
-            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
-            font-size: 0.9rem;
+            padding: 4px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
             color: #666;
             cursor: pointer;
             transition: color 0.3s ease;
@@ -74,14 +74,14 @@
         
         .auth-toggle-slider {
             position: absolute;
-            top: 3px;
-            left: 3px;
-            width: calc(50% - 3px);
-            height: calc(100% - 6px);
-            background: rgba(255, 255, 255, 0.75);
+            top: 2px;
+            left: 2px;
+            width: calc(50% - 2px);
+            height: calc(100% - 4px);
+            background: rgba(255, 255, 255, 0.55);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 11px;
+            border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1;
@@ -101,7 +101,7 @@
             border: none;
             border-radius: 12px;
             padding: 14px 18px;
-            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-family: 'Courier New', monospace;
             font-size: 1.05rem;
             color: #1a1a1a;
             width: 100%;
@@ -120,15 +120,19 @@
             background: #e8e8e8;
         }
         
-        @supports (caret-width: 3px) {
+        @supports (caret-width: 8px) {
             .input-bubble {
-                caret-width: 3px;
+                caret-width: 8px;
             }
         }
         
         @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+            0%, 70% { opacity: 1; }
+            71%, 100% { opacity: 0; }
+        }
+        
+        .input-bubble {
+            animation: blink 1.8s infinite;
         }
         
         .auth-btn {
@@ -138,7 +142,7 @@
             border: none;
             border-radius: 12px;
             padding: 14px;
-            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-family: 'Courier New', monospace;
             font-size: 1.05rem;
             cursor: pointer;
             margin-top: 8px;
@@ -192,7 +196,7 @@
         .header-item {
             background: none;
             border: none;
-            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-family: 'Courier New', monospace;
             font-size: 0.85rem;
             color: #1a1a1a;
             cursor: pointer;
@@ -235,15 +239,16 @@
         
         .mode-toggle {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             margin-bottom: 1rem;
+            padding-left: 20px;
         }
         
         .toggle-container {
             position: relative;
             background: rgba(0, 0, 0, 0.06);
-            border-radius: 14px;
-            padding: 3px;
+            border-radius: 12px;
+            padding: 2px;
             display: inline-flex;
         }
         
@@ -251,9 +256,9 @@
             position: relative;
             background: transparent;
             border: none;
-            padding: 6px 20px;
-            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
-            font-size: 0.9rem;
+            padding: 4px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
             color: #666;
             cursor: pointer;
             transition: color 0.3s ease;
@@ -266,14 +271,14 @@
         
         .toggle-slider {
             position: absolute;
-            top: 3px;
-            left: 3px;
-            width: calc(50% - 3px);
-            height: calc(100% - 6px);
-            background: rgba(255, 255, 255, 0.75);
+            top: 2px;
+            left: 2px;
+            width: calc(50% - 2px);
+            height: calc(100% - 4px);
+            background: rgba(255, 255, 255, 0.55);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 11px;
+            border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1;
@@ -294,7 +299,7 @@
             border: none;
             border-radius: 16px;
             color: #1a1a1a;
-            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-family: 'Courier New', monospace;
             font-size: 1.1rem;
             padding: 16px 20px;
             outline: none;
@@ -303,10 +308,14 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
         
-        @supports (caret-width: 3px) {
+        @supports (caret-width: 8px) {
             .input-box {
-                caret-width: 3px;
+                caret-width: 8px;
             }
+        }
+        
+        .input-box {
+            animation: blink 1.8s infinite;
         }
         
         .input-box:focus {
