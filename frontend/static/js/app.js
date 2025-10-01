@@ -345,8 +345,17 @@ class CapsuleApp {
             this.showStatus('', true);
             this.clearOutput();
             
+            // Add timestamp context for temporal understanding
+            const now = new Date();
+            const timestamp = now.toISOString();
+            const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            const contextualMemory = `[${timestamp}] [${dayOfWeek}, ${dateStr} at ${timeStr}] ${memory}`;
+            
             const formData = new FormData();
-            formData.append('memory', memory);
+            formData.append('memory', contextualMemory);
             
             await this.makeRequest('/add', {
                 method: 'POST',
@@ -403,6 +412,11 @@ function logout() {
 function setMode(mode) {
     if (!app) { console.error('App not initialized'); return; }
     app.setMode(mode);
+}
+
+function handleSubmit() {
+    if (!app) { console.error('App not initialized'); return; }
+    app.handleSubmit();
 }
 
 // initialize when script loads

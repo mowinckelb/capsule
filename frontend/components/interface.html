@@ -96,20 +96,30 @@
             max-width: 360px;
         }
         
+        .auth-input-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        
         .input-bubble {
             background: #f0f0f0;
             border: none;
             border-radius: 12px;
             padding: 14px 18px;
+            padding-right: 50px;
             font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 1.05rem;
             color: #1a1a1a;
             width: 100%;
-            margin-bottom: 12px;
             outline: none;
             transition: background 0.2s ease;
             caret-color: #1a1a1a;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .input-bubble.no-arrow {
+            padding-right: 18px;
+            margin-bottom: 12px;
         }
         
         .input-bubble::placeholder {
@@ -130,6 +140,24 @@
             caret-color: rgba(26, 26, 26, 0.4);
         }
         
+        .auth-submit-arrow {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: color 0.2s ease;
+            outline: none;
+        }
+        
+        .auth-submit-arrow:hover {
+            color: #1a1a1a;
+        }
 
         
         .auth-message {
@@ -275,6 +303,10 @@
             margin: 0 auto;
         }
         
+        .input-container {
+            position: relative;
+        }
+        
         .input-box {
             width: 100%;
             background: #f4f4f4;
@@ -284,6 +316,7 @@
             font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
             font-size: 1.1rem;
             padding: 16px 20px;
+            padding-right: 60px;
             outline: none;
             transition: background 0.2s ease;
             caret-color: #1a1a1a;
@@ -302,6 +335,25 @@
         
         .input-box:focus {
             background: #efefef;
+        }
+        
+        .submit-arrow {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: color 0.2s ease;
+            outline: none;
+        }
+        
+        .submit-arrow:hover {
+            color: #1a1a1a;
         }
         
         .status-message {
@@ -371,8 +423,11 @@
         </div>
         
         <div class="auth-form">
-            <input type="text" id="auth-username" class="input-bubble" placeholder="" autocomplete="off" spellcheck="false">
-            <input type="password" id="auth-password" class="input-bubble" placeholder="" autocomplete="off" spellcheck="false">
+            <input type="text" id="auth-username" class="input-bubble no-arrow" placeholder="" autocomplete="off" spellcheck="false">
+            <div class="auth-input-wrapper">
+                <input type="password" id="auth-password" class="input-bubble" placeholder="" autocomplete="off" spellcheck="false">
+                <button class="auth-submit-arrow" onclick="handleAuth()" tabindex="0">→</button>
+            </div>
         </div>
         
         <div id="auth-message" class="auth-message"></div>
@@ -408,7 +463,10 @@
                     </div>
                 </div>
                 
-                <input type="text" id="main-input" class="input-box" autocomplete="off" tabindex="0" spellcheck="false">
+                <div class="input-container">
+                    <input type="text" id="main-input" class="input-box" autocomplete="off" tabindex="0" spellcheck="false">
+                    <button class="submit-arrow" onclick="handleSubmit()" tabindex="0">→</button>
+                </div>
                 <div id="status-message" class="status-message"></div>
             </div>
         </div>
