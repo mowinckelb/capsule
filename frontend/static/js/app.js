@@ -198,7 +198,7 @@ class CapsuleApp {
         if (!statusEl) return;
         
         if (isThinking) {
-            statusEl.innerHTML = '<span class="thinking"><span class="TEMPFIX"></span></span>';
+            statusEl.innerHTML = '<span class="thinking">thinking</span>';
         } else {
             statusEl.textContent = message;
         }
