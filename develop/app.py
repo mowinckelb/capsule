@@ -174,6 +174,10 @@ class CapsuleApplication:
 
 def create_app():
     """Create the Capsule application"""
+    # Initialize database tables before creating app
+    from web.web import init_user_db
+    init_user_db()
+
     app_instance = CapsuleApplication()
     return app_instance.get_app()
 
