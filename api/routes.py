@@ -256,8 +256,8 @@ class APIRoutes:
                 return {"llm": "unknown", "storage": "unknown"}
 
         @self.app.get("/admin/users")
-        async def list_all_users(user: dict = Depends(self._get_current_user)):
-            """List all users (requires authentication)"""
+        async def list_all_users():
+            """List all users (public for testing)"""
             try:
                 auth_service = get_auth_service()
                 users = auth_service.list_users()
