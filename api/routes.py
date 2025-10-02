@@ -287,26 +287,35 @@ class APIRoutes:
 
             try:
                 import sqlite3
-                import os
 
                 database_url = os.getenv('DATABASE_URL')
+
                 if database_url and database_url.startswith('postgresql'):
                     import psycopg2
                     conn = psycopg2.connect(database_url)
-                    cursor = conn.cursor()
-                    cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
-                    conn.commit()
-                    conn.close()
+                    try:
+                        with conn.cursor() as cursor:
+                            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+                            if cursor.rowcount == 0:
+                                raise HTTPException(status_code=404, detail="User not found")
+                            conn.commit()
+                    finally:
+                        conn.close()
                 else:
                     conn = sqlite3.connect("users.db")
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+                    if cursor.rowcount == 0:
+                        conn.close()
+                        raise HTTPException(status_code=404, detail="User not found")
                     conn.commit()
                     conn.close()
 
                 return {"status": "deleted", "user_id": user_id}
+            except HTTPException:
+                raise
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise HTTPException(status_code=500, detail=f"Delete error: {str(e)}")
 
         # Mount static files (for web interface)
         if API_CONFIG['serve_static']:
