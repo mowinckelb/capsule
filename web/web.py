@@ -251,5 +251,66 @@ async def get_providers():
             "storage": "unknown"
         }
 
+# Admin endpoints for user management
+@app.get("/admin/users")
+async def list_all_users(user: dict = Depends(get_current_user)):
+    """List all users (requires authentication)"""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT user_id, created_at FROM users ORDER BY created_at DESC")
+            users = cursor.fetchall()
+        
+        return {
+            "users": [
+                {
+                    "user_id": u[0],
+                    "created_at": str(u[1]) if len(u) > 1 and u[1] else "unknown"
+                } for u in users
+            ],
+            "count": len(users)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, user: dict = Depends(get_current_user)):
+    """Delete a specific user (requires authentication)"""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            placeholder = "%s" if is_postgres() else "?"
+            
+            # Check if user exists
+            cursor.execute(f"SELECT user_id FROM users WHERE user_id = {placeholder}", (user_id,))
+            if not cursor.fetchone():
+                raise HTTPException(status_code=404, detail="user not found")
+            
+            # Delete user
+            cursor.execute(f"DELETE FROM users WHERE user_id = {placeholder}", (user_id,))
+            conn.commit()
+        
+        return {"status": "deleted", "user_id": user_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/admin/users")
+async def delete_all_users(user: dict = Depends(get_current_user)):
+    """Delete all users - USE WITH CAUTION (requires authentication)"""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM users")
+            count = cursor.fetchone()[0]
+            
+            cursor.execute("DELETE FROM users")
+            conn.commit()
+        
+        return {"status": "all users deleted", "count": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8001)), reload=False)
