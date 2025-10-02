@@ -357,7 +357,7 @@ class CapsuleApp {
             // Delay thinking indicator slightly
             setTimeout(() => {
                 this.showStatus('', true);
-            }, 500);
+            }, 1000);
 
             // Add timestamp context for temporal understanding
             const now = new Date();
@@ -391,7 +391,7 @@ class CapsuleApp {
             // Delay thinking indicator slightly
             setTimeout(() => {
                 this.showStatus('', true);
-            }, 500);
+            }, 1000);
 
             const result = await this.makeRequest(`/query?q=${encodeURIComponent(query)}`);
             
