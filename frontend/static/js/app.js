@@ -364,9 +364,9 @@ class CapsuleApp {
             const timestamp = now.toISOString();
             const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
             const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            
-            const contextualMemory = `[${timestamp}] [${dayOfWeek}, ${dateStr} at ${timeStr}] ${memory}`;
+
+            // Only include the date, not the specific time (to avoid false time assumptions)
+            const contextualMemory = `[${timestamp}] [${dayOfWeek}, ${dateStr}] ${memory}`;
             
             const formData = new FormData();
             formData.append('memory', contextualMemory);
