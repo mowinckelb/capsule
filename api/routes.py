@@ -267,15 +267,42 @@ class APIRoutes:
         @self.app.get("/admin/users")
         async def list_all_users(user: dict = Depends(self._get_current_user)):
             """List all users (admin only)"""
+            print(f"[ADMIN] List users request by {user['user_id']}")
+
             # Admin check - only benjamin can access
             if user["user_id"] != "benjamin":
+                print(f"[ADMIN] Access denied")
                 raise HTTPException(status_code=403, detail="Admin access required")
 
             try:
-                auth_service = get_auth_service()
-                users = auth_service.list_users()
+                import sqlite3
+                database_url = os.getenv('DATABASE_URL')
+
+                if database_url and database_url.startswith('postgresql'):
+                    print("[ADMIN] Using PostgreSQL")
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT user_id FROM users")
+                    users = [row[0] for row in cursor.fetchall()]
+                    cursor.close()
+                    conn.close()
+                else:
+                    print("[ADMIN] Using SQLite")
+                    conn = sqlite3.connect("users.db")
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT user_id FROM users")
+                    users = [row[0] for row in cursor.fetchall()]
+                    conn.close()
+
+                print(f"[ADMIN] Found users: {users}")
                 return {"users": users, "count": len(users)}
             except Exception as e:
+                print(f"[ADMIN] Error: {e}")
                 raise HTTPException(status_code=500, detail=str(e))
 
         @self.app.delete("/admin/users/{user_id}")
