@@ -339,7 +339,10 @@ class CapsuleApp {
         if (!text) return;
         
         input.value = '';
-        
+
+        // Return focus to input after arrow click (mobile)
+        input.focus();
+
         if (this.mode === 'input') {
             await this.addMemory(text);
         } else {
@@ -354,8 +357,8 @@ class CapsuleApp {
             // Delay thinking indicator slightly
             setTimeout(() => {
                 this.showStatus('', true);
-            }, 200);
-            
+            }, 500);
+
             // Add timestamp context for temporal understanding
             const now = new Date();
             const timestamp = now.toISOString();
@@ -388,8 +391,8 @@ class CapsuleApp {
             // Delay thinking indicator slightly
             setTimeout(() => {
                 this.showStatus('', true);
-            }, 200);
-            
+            }, 500);
+
             const result = await this.makeRequest(`/query?q=${encodeURIComponent(query)}`);
             
             this.showStatus('');
