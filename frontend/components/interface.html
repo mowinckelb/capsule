@@ -52,7 +52,7 @@
             top: 2rem;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1rem;
+            font-size: 0.85rem;
             opacity: 0.55;
         }
         
@@ -198,7 +198,7 @@
             right: 0;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             padding: 1.5rem;
             opacity: 0.55;
             font-size: 0.85rem;
@@ -207,19 +207,24 @@
         }
         
         .header-left {
+            position: absolute;
+            left: 50%;
+            transform: translateX(calc(-100% - 6rem));
             display: flex;
             align-items: center;
         }
         
         .header-right {
+            position: absolute;
+            right: 50%;
+            transform: translateX(calc(100% + 6rem));
             display: flex;
             align-items: center;
         }
         
         .header-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
         }
         
         @media (max-width: 768px) {
@@ -400,10 +405,10 @@
         
         .status-message {
             font-size: 0.75rem;
-            margin-top: 0.5rem;
+            margin-top: 0.75rem;
             text-align: left;
             padding-left: 20px;
-            min-height: 1rem;
+            height: 1rem;
             color: #999;
         }
         
