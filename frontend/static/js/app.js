@@ -9,7 +9,8 @@ class CapsuleApp {
         this.api_base = window.location.origin;
         this.mode = 'input';
         this.authMode = 'login';
-        
+        this.isProcessing = false;
+
         this.init();
     }
     
@@ -334,20 +335,37 @@ class CapsuleApp {
     async handleSubmit() {
         const input = document.getElementById('main-input');
         if (!input) return;
-        
+
         const text = input.value.trim();
         if (!text) return;
-        
-        input.value = '';
 
-        // Blur input to collapse mobile keyboard
-        input.blur();
-
-        if (this.mode === 'input') {
-            await this.addMemory(text);
-        } else {
-            await this.queryMemories(text);
+        // Prevent double submission
+        if (this.isProcessing) {
+            this.shakeInput(input);
+            return;
         }
+
+        input.value = '';
+        this.isProcessing = true;
+
+        try {
+            if (this.mode === 'input') {
+                await this.addMemory(text);
+            } else {
+                await this.queryMemories(text);
+            }
+        } finally {
+            this.isProcessing = false;
+            // Only refocus on desktop to avoid triggering mobile keyboard
+            if (window.innerWidth > 768) {
+                input.focus();
+            }
+        }
+    }
+
+    shakeInput(input) {
+        input.classList.add('shake');
+        setTimeout(() => input.classList.remove('shake'), 500);
     }
     
     async addMemory(memory) {
