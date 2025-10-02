@@ -93,24 +93,92 @@ class APIRoutes:
         @self.app.post("/register")
         async def register(user_id: str = Form(), password: str = Form()):
             """Register a new user"""
+            print(f"[REGISTER] User: {user_id}")
             try:
-                auth_service = get_auth_service()
-                result = auth_service.register(user_id, password)
+                import sqlite3
+                from passlib.context import CryptContext
+
+                pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+                database_url = os.getenv('DATABASE_URL')
+
+                if database_url and database_url.startswith('postgresql'):
+                    print("[REGISTER] Using PostgreSQL")
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
+
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
+                    if cursor.fetchone():
+                        cursor.close()
+                        conn.close()
+                        raise HTTPException(status_code=400, detail="User already exists")
+
+                    hashed_password = pwd_context.hash(password)
+                    cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (%s, %s)", (user_id, hashed_password))
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    print(f"[REGISTER] Success: {user_id}")
+                else:
+                    print("[REGISTER] Using SQLite")
+                    auth_service = get_auth_service()
+                    auth_service.register(user_id, password)
+
                 return {"status": "registered"}
             except HTTPException:
                 raise
             except Exception as e:
+                print(f"[REGISTER] Error: {e}")
                 raise HTTPException(status_code=500, detail=str(e))
         
         @self.app.post("/login")
         async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             """Login a user"""
+            print(f"[LOGIN] User: {form_data.username}")
             try:
-                auth_service = get_auth_service()
-                return auth_service.login(form_data.username, form_data.password)
+                import sqlite3
+                from passlib.context import CryptContext
+
+                pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+                database_url = os.getenv('DATABASE_URL')
+
+                if database_url and database_url.startswith('postgresql'):
+                    print("[LOGIN] Using PostgreSQL")
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
+
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT hashed_password FROM users WHERE user_id = %s", (form_data.username,))
+                    user = cursor.fetchone()
+                    cursor.close()
+                    conn.close()
+
+                    if not user:
+                        print(f"[LOGIN] User not found")
+                        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+                    if not pwd_context.verify(form_data.password, user[0]):
+                        print(f"[LOGIN] Wrong password")
+                        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+                    print(f"[LOGIN] Success")
+                    return {"access_token": form_data.username, "token_type": "bearer"}
+                else:
+                    print("[LOGIN] Using SQLite")
+                    auth_service = get_auth_service()
+                    return auth_service.login(form_data.username, form_data.password)
             except HTTPException:
                 raise
             except Exception as e:
+                print(f"[LOGIN] Error: {e}")
                 raise HTTPException(status_code=500, detail=str(e))
         
         @self.app.post("/add")
