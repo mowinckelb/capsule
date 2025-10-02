@@ -246,6 +246,26 @@
             .header {
                 padding: 1rem;
             }
+            
+            .header-left {
+                gap: 0;
+            }
+            
+            .header-left .header-divider {
+                display: none;
+            }
+            
+            .header-left .header-item {
+                display: none;
+            }
+            
+            .header-right {
+                display: flex;
+            }
+            
+            .header-right .header-item {
+                display: block;
+            }
         }
         
         .header-item {
@@ -482,7 +502,9 @@
             <div class="header-center">
                 <span>capsule</span>
             </div>
-            <div class="header-right"></div>
+            <div class="header-right">
+                <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
+            </div>
         </div>
         
         <div class="output-area">
