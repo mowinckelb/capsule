@@ -257,7 +257,11 @@ class APIRoutes:
 
         @self.app.get("/admin/users")
         async def list_all_users(user: dict = Depends(self._get_current_user)):
-            """List all users (requires authentication)"""
+            """List all users (admin only)"""
+            # Admin check - only benjamin can access
+            if user["user_id"] != "benjamin":
+                raise HTTPException(status_code=403, detail="Admin access required")
+
             try:
                 auth_service = get_auth_service()
                 users = auth_service.list_users()
@@ -267,7 +271,11 @@ class APIRoutes:
 
         @self.app.delete("/admin/users/{user_id}")
         async def delete_user(user_id: str, user: dict = Depends(self._get_current_user)):
-            """Delete a specific user"""
+            """Delete a specific user (admin only)"""
+            # Admin check - only benjamin can access
+            if user["user_id"] != "benjamin":
+                raise HTTPException(status_code=403, detail="Admin access required")
+
             try:
                 import sqlite3
                 import os
