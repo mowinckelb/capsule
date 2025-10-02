@@ -14,11 +14,18 @@ import uvicorn
 from contextlib import contextmanager
 
 try:
-    import psycopg2
+    import psycopg
     POSTGRES_AVAILABLE = True
+    POSTGRES_MODULE = 'psycopg'
 except ImportError:
-    POSTGRES_AVAILABLE = False
-    print("⚠️  psycopg2 not available, using SQLite fallback")
+    try:
+        import psycopg2
+        POSTGRES_AVAILABLE = True
+        POSTGRES_MODULE = 'psycopg2'
+    except ImportError:
+        POSTGRES_AVAILABLE = False
+        POSTGRES_MODULE = None
+        print("⚠️  PostgreSQL driver not available, using SQLite fallback")
 
 try:
     handler = LLMHandler()
@@ -43,8 +50,13 @@ def get_db_connection():
     database_url = os.getenv('DATABASE_URL')
     
     if database_url and database_url.startswith('postgresql') and POSTGRES_AVAILABLE:
-        # Use PostgreSQL
-        conn = psycopg2.connect(database_url)
+        # Use PostgreSQL (psycopg3 or psycopg2)
+        if POSTGRES_MODULE == 'psycopg':
+            import psycopg
+            conn = psycopg.connect(database_url)
+        else:
+            import psycopg2
+            conn = psycopg2.connect(database_url)
         try:
             yield conn
         finally:
