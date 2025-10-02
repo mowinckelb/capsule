@@ -444,8 +444,44 @@ class APIRoutes:
     
     def _get_current_user(self, token: str = Depends(get_auth_service().get_oauth2_scheme())):
         """Get current user dependency"""
-        auth_service = get_auth_service()
-        return auth_service.get_user_from_token(token)
+        print(f"[AUTH] Validating token: {token}")
+
+        import sqlite3
+        database_url = os.getenv('DATABASE_URL')
+
+        try:
+            if database_url and database_url.startswith('postgresql'):
+                print("[AUTH] Using PostgreSQL")
+                try:
+                    import psycopg
+                    conn = psycopg.connect(database_url)
+                except ImportError:
+                    import psycopg2
+                    conn = psycopg2.connect(database_url)
+
+                cursor = conn.cursor()
+                cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (token,))
+                user = cursor.fetchone()
+                cursor.close()
+                conn.close()
+
+                if not user:
+                    print(f"[AUTH] User not found")
+                    raise HTTPException(status_code=401, detail="Not authenticated")
+
+                print(f"[AUTH] Valid token")
+                return {"user_id": user[0]}
+            else:
+                print("[AUTH] Using SQLite")
+                auth_service = get_auth_service()
+                return auth_service.get_user_from_token(token)
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"[AUTH] Error: {e}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(status_code=401, detail="Not authenticated")
     
     def get_app(self) -> FastAPI:
         """Get the FastAPI application"""
