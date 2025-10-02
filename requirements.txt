@@ -21,7 +21,7 @@ pinecone-client==5.0.1
 sentence-transformers==3.1.1
 
 # PostgreSQL database (using psycopg instead of psycopg2 for Python 3.13 compatibility)
-psycopg[binary]==3.2.1
+psycopg[binary]==3.2.10
 
 # Development and testing (optional)
 pytest==7.4.4
