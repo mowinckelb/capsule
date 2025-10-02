@@ -256,12 +256,38 @@ class APIRoutes:
                 return {"llm": "unknown", "storage": "unknown"}
 
         @self.app.get("/admin/users")
-        async def list_all_users():
-            """List all users (public for testing)"""
+        async def list_all_users(user: dict = Depends(self._get_current_user)):
+            """List all users (requires authentication)"""
             try:
                 auth_service = get_auth_service()
                 users = auth_service.list_users()
                 return {"users": users, "count": len(users)}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.app.delete("/admin/users/{user_id}")
+        async def delete_user(user_id: str, user: dict = Depends(self._get_current_user)):
+            """Delete a specific user"""
+            try:
+                import sqlite3
+                import os
+
+                database_url = os.getenv('DATABASE_URL')
+                if database_url and database_url.startswith('postgresql'):
+                    import psycopg2
+                    conn = psycopg2.connect(database_url)
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+                    conn.commit()
+                    conn.close()
+                else:
+                    conn = sqlite3.connect("users.db")
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+                    conn.commit()
+                    conn.close()
+
+                return {"status": "deleted", "user_id": user_id}
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
 
