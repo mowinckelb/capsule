@@ -3,7 +3,7 @@
 <head>
     <title>capsule</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         * {
             margin: 0;
@@ -44,6 +44,16 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            position: relative;
+        }
+        
+        .auth-header {
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            opacity: 0.55;
         }
         
         .auth-toggle {
@@ -177,32 +187,33 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 1.5rem;
+            padding: 0;
             overflow: hidden;
         }
         
-        @media (max-width: 768px) {
-            .app-container {
-                padding: 1rem;
-                padding-top: 1.5rem;
-            }
-        }
-        
         .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
             opacity: 0.55;
             font-size: 0.85rem;
-            position: relative;
-            z-index: 10;
+            z-index: 100;
+            background: #fafafa;
         }
         
         .header-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
         }
         
         .header-center {
@@ -213,24 +224,7 @@
         
         @media (max-width: 768px) {
             .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-                margin-bottom: 1.5rem;
-                font-size: 0.9rem;
-            }
-            
-            .header-center {
-                position: static;
-                transform: none;
-                order: -1;
-                margin-bottom: 0.5rem;
-                font-size: 1rem;
-                font-weight: 500;
-            }
-            
-            .header-left {
-                width: 100%;
+                padding: 1rem;
             }
         }
         
@@ -248,16 +242,13 @@
             opacity: 0.7;
         }
         
-        .header-divider {
-            color: #ccc;
-        }
-        
         .output-area {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            padding-top: 5rem;
             overflow-y: auto;
         }
         
@@ -275,7 +266,8 @@
         }
         
         .input-area {
-            padding-bottom: 1.5rem;
+            padding: 1.5rem;
+            padding-bottom: 2rem;
         }
         
         .mode-toggle {
@@ -407,55 +399,25 @@
         }
         
         .status-message {
-            font-size: 0.8rem;
-            margin-top: 0.75rem;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
             text-align: left;
             padding-left: 20px;
-            min-height: 1.2rem;
+            min-height: 1rem;
             color: #999;
-            display: flex;
-            align-items: center;
         }
         
         .thinking {
-            display: flex;
-            gap: 3px;
-            align-items: center;
-        }
-        
-        .thinking::before,
-        .thinking::after {
-            content: '';
-            width: 3px;
-            height: 3px;
-            background: #999;
-            border-radius: 50%;
             display: inline-block;
+            animation: pulse 1.2s ease-in-out infinite;
         }
         
-        .thinking::before {
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-        
-        .thinking::after {
-            animation: bounce 1.4s infinite ease-in-out 0.32s;
-        }
-        
-        .thinking-dot {
-            width: 3px;
-            height: 3px;
-            background: #999;
-            border-radius: 50%;
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out 0.16s;
-        }
-        
-        @keyframes bounce {
-            0%, 80%, 100% {
-                transform: translateY(0);
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.4;
             }
-            40% {
-                transform: translateY(-6px);
+            50% {
+                opacity: 1;
             }
         }
         
@@ -466,6 +428,8 @@
 </head>
 <body>
     <div id="auth-screen" class="auth-screen">
+        <div class="auth-header">capsule</div>
+        
         <div class="auth-toggle">
             <button class="auth-toggle-btn active" id="login-toggle" onclick="switchAuthMode('login')">sign in</button>
             <button class="auth-toggle-btn" id="register-toggle" onclick="switchAuthMode('register')">sign up</button>
@@ -487,11 +451,12 @@
         <div class="header">
             <div class="header-left">
                 <span id="user-name" tabindex="0"></span>
-                <span class="header-divider">·</span>
-                <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
             </div>
             <div class="header-center">
                 <span>capsule</span>
+            </div>
+            <div class="header-right">
+                <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
             </div>
         </div>
         
