@@ -349,8 +349,12 @@ class CapsuleApp {
     
     async addMemory(memory) {
         try {
-            this.showStatus('', true);
             this.clearOutput();
+
+            // Delay thinking indicator slightly
+            setTimeout(() => {
+                this.showStatus('', true);
+            }, 200);
             
             // Add timestamp context for temporal understanding
             const now = new Date();
@@ -379,8 +383,12 @@ class CapsuleApp {
     
     async queryMemories(query) {
         try {
-            this.showStatus('', true);
             this.clearOutput();
+
+            // Delay thinking indicator slightly
+            setTimeout(() => {
+                this.showStatus('', true);
+            }, 200);
             
             const result = await this.makeRequest(`/query?q=${encodeURIComponent(query)}`);
             
