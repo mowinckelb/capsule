@@ -77,6 +77,7 @@ def is_postgres():
 # Initialize database for users
 def init_user_db():
     database_url = os.getenv('DATABASE_URL')
+    print(f"🔍 init_user_db called - DATABASE_URL: {bool(database_url)}, POSTGRES_AVAILABLE: {POSTGRES_AVAILABLE}")
     
     if database_url and database_url.startswith('postgresql') and POSTGRES_AVAILABLE:
         # PostgreSQL initialization
@@ -107,7 +108,9 @@ def init_user_db():
         print("✓ SQLite users database initialized (local fallback)")
 
 # Initialize database on startup
+print("🔧 Starting database initialization...")
 init_user_db()
+print("🔧 Database initialization complete")
 
 # Debug environment variables on startup
 print("=== Environment Variables Debug ===")
