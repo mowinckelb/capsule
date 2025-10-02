@@ -140,6 +140,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @app.post("/register")
 async def register(user_id: str = Form(), password: str = Form()):
+    print(f"[REGISTER] Registering user: {user_id}, using PostgreSQL: {is_postgres()}")
     with get_db_connection() as conn:
         cursor = conn.cursor()
         placeholder = "%s" if is_postgres() else "?"
@@ -153,11 +154,13 @@ async def register(user_id: str = Form(), password: str = Form()):
         hashed_password = pwd_context.hash(password)
         cursor.execute(f"INSERT INTO users (user_id, hashed_password) VALUES ({placeholder}, {placeholder})", (user_id, hashed_password))
         conn.commit()
+        print(f"[REGISTER] Successfully registered {user_id}")
         
     return {"status": "registered"}
 
 @app.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    print(f"[LOGIN] Login attempt: {form_data.username}, using PostgreSQL: {is_postgres()}")
     with get_db_connection() as conn:
         cursor = conn.cursor()
         placeholder = "%s" if is_postgres() else "?"
@@ -165,13 +168,16 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         user = cursor.fetchone()
         
     if not user:
+        print(f"[LOGIN] User not found: {form_data.username}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="user not found")
     
     hashed_password = user[0]
     
     if not pwd_context.verify(form_data.password, hashed_password):
+        print(f"[LOGIN] Wrong password for: {form_data.username}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="wrong password")
     
+    print(f"[LOGIN] Success: {form_data.username}")
     return {"access_token": form_data.username, "token_type": "bearer"}
 
 @app.post("/add")
