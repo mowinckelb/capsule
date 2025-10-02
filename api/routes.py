@@ -300,8 +300,12 @@ class APIRoutes:
 
                 if database_url and database_url.startswith('postgresql'):
                     print(f"[DELETE] Using PostgreSQL")
-                    import psycopg2
-                    conn = psycopg2.connect(database_url)
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
                     try:
                         with conn.cursor() as cursor:
                             cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
