@@ -160,6 +160,16 @@
             caret-color: rgba(26, 26, 26, 0.4);
         }
         
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+        
         .auth-submit-arrow {
             position: absolute;
             right: 14px;
