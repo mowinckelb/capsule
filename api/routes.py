@@ -61,7 +61,16 @@ class APIRoutes:
                 <p>API is running at <a href="/docs">/docs</a></p>
                 </body></html>
                 """
-        
+
+        @self.app.get("/admin", response_class=HTMLResponse)
+        async def admin_page():
+            """Serve the admin interface"""
+            frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "admin.html"
+            if frontend_path.exists():
+                return frontend_path.read_text(encoding='utf-8')
+            else:
+                return "<h1>Admin page not found</h1>"
+
         @self.app.get("/api")
         async def api_info():
             """API info endpoint"""
