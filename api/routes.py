@@ -281,27 +281,38 @@ class APIRoutes:
         @self.app.delete("/admin/users/{user_id}")
         async def delete_user(user_id: str, user: dict = Depends(self._get_current_user)):
             """Delete a specific user (admin only)"""
-            # Admin check - only benjamin can access
+            print(f"[DELETE] Request to delete user: {user_id} by {user['user_id']}")
+
+            # Admin check
             if user["user_id"] != "benjamin":
+                print(f"[DELETE] Access denied - not admin")
                 raise HTTPException(status_code=403, detail="Admin access required")
+
+            # Prevent self-deletion
+            if user_id == "benjamin":
+                print(f"[DELETE] Cannot delete admin")
+                raise HTTPException(status_code=400, detail="Cannot delete admin user")
 
             try:
                 import sqlite3
-
                 database_url = os.getenv('DATABASE_URL')
+                print(f"[DELETE] DATABASE_URL exists: {bool(database_url)}")
 
                 if database_url and database_url.startswith('postgresql'):
+                    print(f"[DELETE] Using PostgreSQL")
                     import psycopg2
                     conn = psycopg2.connect(database_url)
                     try:
                         with conn.cursor() as cursor:
                             cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+                            print(f"[DELETE] Rows affected: {cursor.rowcount}")
                             if cursor.rowcount == 0:
                                 raise HTTPException(status_code=404, detail="User not found")
                             conn.commit()
                     finally:
                         conn.close()
                 else:
+                    print(f"[DELETE] Using SQLite")
                     conn = sqlite3.connect("users.db")
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
@@ -311,11 +322,15 @@ class APIRoutes:
                     conn.commit()
                     conn.close()
 
+                print(f"[DELETE] Success: {user_id}")
                 return {"status": "deleted", "user_id": user_id}
             except HTTPException:
                 raise
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Delete error: {str(e)}")
+                print(f"[DELETE] Exception: {type(e).__name__}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
         # Mount static files (for web interface)
         if API_CONFIG['serve_static']:
