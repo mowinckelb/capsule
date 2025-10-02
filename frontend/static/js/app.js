@@ -340,8 +340,8 @@ class CapsuleApp {
         
         input.value = '';
 
-        // Return focus to input after arrow click (mobile)
-        input.focus();
+        // Blur input to collapse mobile keyboard
+        input.blur();
 
         if (this.mode === 'input') {
             await this.addMemory(text);
