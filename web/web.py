@@ -82,18 +82,21 @@ def init_user_db():
         # PostgreSQL initialization
         try:
             with get_db_connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute("""
-                        CREATE TABLE IF NOT EXISTS users (
-                            user_id TEXT PRIMARY KEY,
-                            hashed_password TEXT NOT NULL,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        )
-                    """)
-                    conn.commit()
-            print("✓ PostgreSQL users table initialized")
+                cursor = conn.cursor()
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        user_id TEXT PRIMARY KEY,
+                        hashed_password TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                conn.commit()
+                cursor.close()
+            print("✅ PostgreSQL users table initialized")
         except Exception as e:
-            print(f"✗ PostgreSQL initialization failed: {e}")
+            print(f"❌ PostgreSQL initialization failed: {e}")
+            import traceback
+            traceback.print_exc()
     else:
         # SQLite initialization
         conn = sqlite3.connect("users.db")
