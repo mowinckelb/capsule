@@ -96,6 +96,20 @@
             color: #666;
         }
         
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+        
+        .shake {
+            animation: shake 0.2s ease-in-out;
+        }
+        
+        .project-item.inactive {
+            cursor: not-allowed;
+        }
+        
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
@@ -200,7 +214,7 @@
                 <span class="project-owner">benjamin</span>
             </a>
             
-            <div class="project-item">
+            <div class="project-item inactive" onclick="shakeProject(this)">
                 <div class="project-info">
                     <span class="project-name">axioms</span>
                     <span class="project-divider">·</span>
@@ -209,7 +223,7 @@
                 <span class="project-owner">benjamin</span>
             </div>
             
-            <div class="project-item">
+            <div class="project-item inactive" onclick="shakeProject(this)">
                 <div class="project-info">
                     <span class="project-name">priors</span>
                     <span class="project-divider">·</span>
@@ -218,7 +232,7 @@
                 <span class="project-owner">benjamin</span>
             </div>
             
-            <div class="project-item">
+            <div class="project-item inactive" onclick="shakeProject(this)">
                 <div class="project-info">
                     <span class="project-name">mowinckels</span>
                     <span class="project-divider">·</span>
@@ -227,7 +241,7 @@
                 <span class="project-owner">benjamin</span>
             </div>
             
-            <div class="project-item">
+            <div class="project-item inactive" onclick="shakeProject(this)">
                 <div class="project-info">
                     <span class="project-name">seida</span>
                     <span class="project-divider">·</span>
@@ -237,5 +251,20 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        function shakeProject(element) {
+            // Prevent default action
+            event.preventDefault();
+            
+            // Add shake class
+            element.classList.add('shake');
+            
+            // Remove shake class after animation completes
+            setTimeout(() => {
+                element.classList.remove('shake');
+            }, 200);
+        }
+    </script>
 </body>
 </html>
