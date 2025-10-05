@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>mowinckel.ai</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 4rem;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 300;
+        }
+        
+        .projects {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .project-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            display: block;
+        }
+        
+        .project-card:hover {
+            border-color: rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+        
+        .project-title {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+        
+        .project-description {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        .project-status {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            font-size: 0.85rem;
+            color: #999;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .project-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>mowinckel.ai</h1>
+            <p class="subtitle">personal ai projects</p>
+        </div>
+        
+        <div class="projects">
+            <a href="/capsule" class="project-card">
+                <div class="project-title">capsule</div>
+                <div class="project-description">
+                    a personal memory system powered by ai. store your thoughts and memories naturally, 
+                    retrieve them through intelligent queries. your second brain.
+                </div>
+                <span class="project-status">live</span>
+            </a>
+            
+            <!-- Add more projects here as they come -->
+        </div>
+        
+        <div class="footer">
+            <p>building with ai, one project at a time</p>
+        </div>
+    </div>
+</body>
+</html>

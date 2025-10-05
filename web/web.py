@@ -251,9 +251,15 @@ async def upload(mcp_data: dict, user: dict = Depends(get_current_user)):
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 app.mount("/static", StaticFiles(directory=os.path.join(frontend_dir, "static")), name="static")
 
-# Serve the main interface at root
+# Serve the portfolio landing page at root
 @app.get("/")
 async def root():
+    landing_path = os.path.join(frontend_dir, "components", "portfolio_landing.html")
+    return FileResponse(landing_path)
+
+# Serve the Capsule signin/interface at /capsule
+@app.get("/capsule")
+async def capsule_interface():
     interface_path = os.path.join(frontend_dir, "components", "interface.html")
     return FileResponse(interface_path)
 
