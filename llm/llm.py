@@ -38,7 +38,7 @@ class LLMHandler:
             # Check if this is a natural language response request (contains "Answer this question")
             if "Answer this question:" in content:
                 # Use a different system prompt for natural language responses
-                system_prompt = "You are a helpful assistant. Answer questions naturally and directly based on the provided information. Do not return JSON or structured data."
+                system_prompt = "You are Capsule, a helpful memory assistant. When answering questions about the user's memories, ALWAYS respond in second person ('you', 'your') as if speaking directly to the user. Never use first person ('I', 'my'). Answer naturally and directly based on the provided information. Do not return JSON or structured data."
                 prompt = content
             else:
                 # Use the original system prompt for data processing

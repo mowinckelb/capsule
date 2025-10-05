@@ -3,7 +3,7 @@
     {
       "type": "web",
       "env": "python",
-      "buildCommand": "pip install --no-cache-dir -r requirements.txt",
+      "buildCommand": "pip uninstall -y pinecone pinecone-plugin-inference && pip install --no-cache-dir -r requirements.txt",
       "startCommand": "uvicorn develop.app:create_app --factory --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 10 --timeout-keep-alive 30"
     }
   ]
