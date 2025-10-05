@@ -30,21 +30,14 @@
         }
         
         .header {
-            margin-bottom: 4rem;
+            margin-bottom: 2rem;
         }
         
         h1 {
-            font-size: 3rem;
-            font-weight: 300;
-            letter-spacing: -0.02em;
-            margin-bottom: 1rem;
-            color: #1a1a1a;
-        }
-        
-        .subtitle {
-            font-size: 1.1rem;
-            color: #666;
-            font-weight: 300;
+            font-size: 1.5rem;
+            font-weight: 400;
+            opacity: 0.55;
+            text-align: center;
         }
         
         .projects {
@@ -112,16 +105,8 @@
         }
         
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            .project-card {
-                padding: 1.5rem;
+            .project-item {
+                padding: 1rem;
             }
         }
     </style>
@@ -129,20 +114,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>mowinckel.ai</h1>
-            <p class="subtitle">personal ai projects</p>
+            <h1>projects</h1>
         </div>
         
         <div class="projects">
-            <a href="/capsule" class="project-item">
-                <div class="project-info">
-                    <span class="project-name">capsule</span>
-                    <span class="project-divider">·</span>
-                    <span class="project-status active">active</span>
-                </div>
-                <span class="project-owner">benjamin</span>
-            </a>
-            
             <div class="project-item">
                 <div class="project-info">
                     <span class="project-name">mowinckels</span>
@@ -151,6 +126,15 @@
                 </div>
                 <span class="project-owner">benjamin</span>
             </div>
+            
+            <a href="/capsule" class="project-item">
+                <div class="project-info">
+                    <span class="project-name">capsule</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status active">active</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </a>
             
             <div class="project-item">
                 <div class="project-info">
