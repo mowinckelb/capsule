@@ -42,7 +42,7 @@ class APIRoutes:
             """Root endpoint - Serve the web interface"""
             try:
                 # Get the frontend HTML file
-                frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "interface.html"
+                frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "portfolio_landing.html"
                 if frontend_path.exists():
                     return frontend_path.read_text(encoding='utf-8')
                 else:
@@ -61,7 +61,30 @@ class APIRoutes:
                 <p>API is running at <a href="/docs">/docs</a></p>
                 </body></html>
                 """
-        
+        @self.app.get("/capsule", response_class=HTMLResponse)
+        async def capsule_interface():
+            """Capsule signin/interface page"""
+            try:
+                # Get the Capsule interface  
+                frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "interface.html"
+                if frontend_path.exists():
+                    return frontend_path.read_text(encoding='utf-8')
+                else:
+                    return "<h1>Capsule interface not found</h1>"
+            except Exception as e:
+                return f"<h1>Error loading Capsule interface: {e}</h1>"
+
+
+
+        @self.app.get("/admin", response_class=HTMLResponse)
+        async def admin_page():
+            """Serve the admin interface"""
+            frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "admin.html"
+            if frontend_path.exists():
+                return frontend_path.read_text(encoding='utf-8')
+            else:
+                return "<h1>Admin page not found</h1>"
+
         @self.app.get("/api")
         async def api_info():
             """API info endpoint"""
@@ -84,24 +107,92 @@ class APIRoutes:
         @self.app.post("/register")
         async def register(user_id: str = Form(), password: str = Form()):
             """Register a new user"""
+            print(f"[REGISTER] User: {user_id}")
             try:
-                auth_service = get_auth_service()
-                result = auth_service.register(user_id, password)
+                import sqlite3
+                from passlib.context import CryptContext
+
+                pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+                database_url = os.getenv('DATABASE_URL')
+
+                if database_url and database_url.startswith('postgresql'):
+                    print("[REGISTER] Using PostgreSQL")
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
+
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
+                    if cursor.fetchone():
+                        cursor.close()
+                        conn.close()
+                        raise HTTPException(status_code=400, detail="User already exists")
+
+                    hashed_password = pwd_context.hash(password)
+                    cursor.execute("INSERT INTO users (user_id, hashed_password) VALUES (%s, %s)", (user_id, hashed_password))
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    print(f"[REGISTER] Success: {user_id}")
+                else:
+                    print("[REGISTER] Using SQLite")
+                    auth_service = get_auth_service()
+                    auth_service.register(user_id, password)
+
                 return {"status": "registered"}
             except HTTPException:
                 raise
             except Exception as e:
+                print(f"[REGISTER] Error: {e}")
                 raise HTTPException(status_code=500, detail=str(e))
         
         @self.app.post("/login")
         async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             """Login a user"""
+            print(f"[LOGIN] User: {form_data.username}")
             try:
-                auth_service = get_auth_service()
-                return auth_service.login(form_data.username, form_data.password)
+                import sqlite3
+                from passlib.context import CryptContext
+
+                pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+                database_url = os.getenv('DATABASE_URL')
+
+                if database_url and database_url.startswith('postgresql'):
+                    print("[LOGIN] Using PostgreSQL")
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
+
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT hashed_password FROM users WHERE user_id = %s", (form_data.username,))
+                    user = cursor.fetchone()
+                    cursor.close()
+                    conn.close()
+
+                    if not user:
+                        print(f"[LOGIN] User not found")
+                        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+                    if not pwd_context.verify(form_data.password, user[0]):
+                        print(f"[LOGIN] Wrong password")
+                        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+                    print(f"[LOGIN] Success")
+                    return {"access_token": form_data.username, "token_type": "bearer"}
+                else:
+                    print("[LOGIN] Using SQLite")
+                    auth_service = get_auth_service()
+                    return auth_service.login(form_data.username, form_data.password)
             except HTTPException:
                 raise
             except Exception as e:
+                print(f"[LOGIN] Error: {e}")
                 raise HTTPException(status_code=500, detail=str(e))
         
         @self.app.post("/add")
@@ -243,7 +334,117 @@ class APIRoutes:
                 return {"users": users}
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
-        
+
+        @self.app.get("/providers")
+        async def get_providers():
+            """Get LLM and storage provider info"""
+            try:
+                from llm.config import DEFAULT_PROVIDER, PROVIDERS
+                from database.config import DEFAULT_DB_PROVIDER
+                llm_model = PROVIDERS.get(DEFAULT_PROVIDER, {}).get('model', 'unknown')
+                return {"llm": llm_model, "storage": DEFAULT_DB_PROVIDER}
+            except:
+                return {"llm": "unknown", "storage": "unknown"}
+
+        @self.app.get("/admin/users")
+        async def list_all_users(user: dict = Depends(self._get_current_user)):
+            """List all users (admin only)"""
+            print(f"[ADMIN] List users request by {user['user_id']}")
+
+            # Admin check - only benjamin can access
+            if user["user_id"] != "benjamin":
+                print(f"[ADMIN] Access denied")
+                raise HTTPException(status_code=403, detail="Admin access required")
+
+            try:
+                import sqlite3
+                database_url = os.getenv('DATABASE_URL')
+
+                if database_url and database_url.startswith('postgresql'):
+                    print("[ADMIN] Using PostgreSQL")
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT user_id FROM users")
+                    users = [row[0] for row in cursor.fetchall()]
+                    cursor.close()
+                    conn.close()
+                else:
+                    print("[ADMIN] Using SQLite")
+                    conn = sqlite3.connect("users.db")
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT user_id FROM users")
+                    users = [row[0] for row in cursor.fetchall()]
+                    conn.close()
+
+                print(f"[ADMIN] Found users: {users}")
+                return {"users": users, "count": len(users)}
+            except Exception as e:
+                print(f"[ADMIN] Error: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.app.delete("/admin/users/{user_id}")
+        async def delete_user(user_id: str, user: dict = Depends(self._get_current_user)):
+            """Delete a specific user (admin only)"""
+            print(f"[DELETE] Request to delete user: {user_id} by {user['user_id']}")
+
+            # Admin check
+            if user["user_id"] != "benjamin":
+                print(f"[DELETE] Access denied - not admin")
+                raise HTTPException(status_code=403, detail="Admin access required")
+
+            # Prevent self-deletion
+            if user_id == "benjamin":
+                print(f"[DELETE] Cannot delete admin")
+                raise HTTPException(status_code=400, detail="Cannot delete admin user")
+
+            try:
+                import sqlite3
+                database_url = os.getenv('DATABASE_URL')
+                print(f"[DELETE] DATABASE_URL exists: {bool(database_url)}")
+
+                if database_url and database_url.startswith('postgresql'):
+                    print(f"[DELETE] Using PostgreSQL")
+                    try:
+                        import psycopg
+                        conn = psycopg.connect(database_url)
+                    except ImportError:
+                        import psycopg2
+                        conn = psycopg2.connect(database_url)
+                    try:
+                        with conn.cursor() as cursor:
+                            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+                            print(f"[DELETE] Rows affected: {cursor.rowcount}")
+                            if cursor.rowcount == 0:
+                                raise HTTPException(status_code=404, detail="User not found")
+                            conn.commit()
+                    finally:
+                        conn.close()
+                else:
+                    print(f"[DELETE] Using SQLite")
+                    conn = sqlite3.connect("users.db")
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+                    if cursor.rowcount == 0:
+                        conn.close()
+                        raise HTTPException(status_code=404, detail="User not found")
+                    conn.commit()
+                    conn.close()
+
+                print(f"[DELETE] Success: {user_id}")
+                return {"status": "deleted", "user_id": user_id}
+            except HTTPException:
+                raise
+            except Exception as e:
+                print(f"[DELETE] Exception: {type(e).__name__}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
         # Mount static files (for web interface)
         if API_CONFIG['serve_static']:
             try:
@@ -257,8 +458,44 @@ class APIRoutes:
     
     def _get_current_user(self, token: str = Depends(get_auth_service().get_oauth2_scheme())):
         """Get current user dependency"""
-        auth_service = get_auth_service()
-        return auth_service.get_user_from_token(token)
+        print(f"[AUTH] Validating token: {token}")
+
+        import sqlite3
+        database_url = os.getenv('DATABASE_URL')
+
+        try:
+            if database_url and database_url.startswith('postgresql'):
+                print("[AUTH] Using PostgreSQL")
+                try:
+                    import psycopg
+                    conn = psycopg.connect(database_url)
+                except ImportError:
+                    import psycopg2
+                    conn = psycopg2.connect(database_url)
+
+                cursor = conn.cursor()
+                cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (token,))
+                user = cursor.fetchone()
+                cursor.close()
+                conn.close()
+
+                if not user:
+                    print(f"[AUTH] User not found")
+                    raise HTTPException(status_code=401, detail="Not authenticated")
+
+                print(f"[AUTH] Valid token")
+                return {"user_id": user[0]}
+            else:
+                print("[AUTH] Using SQLite")
+                auth_service = get_auth_service()
+                return auth_service.get_user_from_token(token)
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"[AUTH] Error: {e}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(status_code=401, detail="Not authenticated")
     
     def get_app(self) -> FastAPI:
         """Get the FastAPI application"""
@@ -267,3 +504,4 @@ class APIRoutes:
 
 # Create the main API instance
 api_routes = APIRoutes()
+

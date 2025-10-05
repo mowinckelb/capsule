@@ -24,12 +24,12 @@ try:
     
     # Create the app instance that Render expects
     app = create_app()
-    print("✅ FastAPI app created successfully for deployment")
+    print("FastAPI app created successfully for deployment")
 except Exception as e:
-    print(f"⚠️ Could not create FastAPI app: {e}")
+    print(f"Warning: Could not create FastAPI app: {e}")
     app = None
 
 # Export the main service and app
 __all__ = ['web_service', 'app']
 
-print("✅ Web module loaded successfully")
+print("Web module loaded successfully")

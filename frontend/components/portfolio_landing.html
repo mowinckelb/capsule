@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>mowinckel.ai</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            opacity: 0.55;
+            text-align: center;
+        }
+        
+        .projects {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+        
+        .project-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .project-item:last-child {
+            border-bottom: none;
+        }
+        
+        .project-item:hover {
+            background: #fafafa;
+        }
+        
+        .project-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .project-name {
+            font-size: 1rem;
+            color: #1a1a1a;
+        }
+        
+        .project-divider {
+            color: #ccc;
+        }
+        
+        .project-status {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .project-status.active {
+            color: #1a1a1a;
+        }
+        
+        .project-owner {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+        
+        .shake {
+            animation: shake 0.2s ease-in-out;
+        }
+        
+        .project-item.inactive {
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+                align-items: flex-start;
+                padding-top: 3rem;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+            
+            .header {
+                margin-bottom: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.25rem;
+            }
+            
+            .projects {
+                margin-bottom: 2rem;
+                border-radius: 8px;
+            }
+            
+            .project-item {
+                padding: 0.875rem 1rem;
+                flex-wrap: nowrap;
+            }
+            
+            .project-info {
+                gap: 0.4rem;
+                flex-shrink: 1;
+                min-width: 0;
+            }
+            
+            .project-name {
+                font-size: 0.95rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .project-divider {
+                flex-shrink: 0;
+            }
+            
+            .project-status {
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+            
+            .project-owner {
+                font-size: 0.8rem;
+                white-space: nowrap;
+                flex-shrink: 0;
+                margin-left: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 0.75rem;
+                padding-top: 2rem;
+            }
+            
+            h1 {
+                font-size: 1.1rem;
+            }
+            
+            .project-item {
+                padding: 0.75rem 0.875rem;
+            }
+            
+            .project-name {
+                font-size: 0.9rem;
+            }
+            
+            .project-status,
+            .project-owner {
+                font-size: 0.75rem;
+            }
+            
+            .footer {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>mowinckel</h1>
+        </div>
+        
+        <div class="projects">
+            <a href="/capsule" class="project-item">
+                <div class="project-info">
+                    <span class="project-name">capsule</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status active">active</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </a>
+            
+            <div class="project-item inactive" onclick="shakeProject(this)">
+                <div class="project-info">
+                    <span class="project-name">axioms</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status">inactive</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </div>
+            
+            <div class="project-item inactive" onclick="shakeProject(this)">
+                <div class="project-info">
+                    <span class="project-name">priors</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status">inactive</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </div>
+            
+            <div class="project-item inactive" onclick="shakeProject(this)">
+                <div class="project-info">
+                    <span class="project-name">mowinckels</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status">inactive</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </div>
+            
+            <a href="https://seida.no" class="project-item" target="_blank" rel="noopener noreferrer">
+                <div class="project-info">
+                    <span class="project-name">seida</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status active">active</span>
+                </div>
+                <span class="project-owner">edward</span>
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        function shakeProject(element) {
+            // Prevent default action
+            event.preventDefault();
+            
+            // Add shake class
+            element.classList.add('shake');
+            
+            // Remove shake class after animation completes
+            setTimeout(() => {
+                element.classList.remove('shake');
+            }, 200);
+        }
+    </script>
+</body>
+</html>

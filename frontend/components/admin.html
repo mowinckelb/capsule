@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>admin - capsule</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            opacity: 0.55;
+            text-align: center;
+        }
+        
+        .user-list {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+        
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-item:hover {
+            background: #fafafa;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-name {
+            font-size: 1rem;
+        }
+        
+        .admin-badge {
+            font-size: 0.75rem;
+            color: #666;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #fee;
+            color: #c33;
+        }
+        
+        .delete-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .back-link:hover {
+            color: #1a1a1a;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #999;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← back to capsule</a>
+        <h1>user management</h1>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+        
+        <div id="loading" class="loading">loading users...</div>
+        
+        <div id="user-list" class="user-list" style="display: none;"></div>
+        
+        <div id="empty-state" class="empty" style="display: none;">
+            no users found
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_USER = 'benjamin';
+        
+        async function loadUsers() {
+            const token = localStorage.getItem('capsule_token');
+            
+            if (!token) {
+                showError('Not authenticated. Please log in first.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 403) {
+                    showError('Admin access required. You do not have permission to view this page.');
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayUsers(data.users);
+            } catch (error) {
+                showError(`Failed to load users: ${error.message}`);
+            }
+        }
+        
+        function displayUsers(users) {
+            const loading = document.getElementById('loading');
+            const userList = document.getElementById('user-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            loading.style.display = 'none';
+            
+            if (!users || users.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            userList.style.display = 'block';
+            userList.innerHTML = users.map(user => {
+                const isAdmin = user === ADMIN_USER;
+                return `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <span class="user-name">${user}</span>
+                            ${isAdmin ? '<span class="admin-badge">admin</span>' : ''}
+                        </div>
+                        <button 
+                            class="delete-btn" 
+                            onclick="deleteUser('${user}')" 
+                            ${isAdmin ? 'disabled' : ''}
+                        >
+                            ${isAdmin ? 'protected' : 'delete'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function deleteUser(userId) {
+            if (userId === ADMIN_USER) {
+                return;
+            }
+            
+            if (!confirm(`Delete user "${userId}"? This cannot be undone.`)) {
+                return;
+            }
+            
+            const token = localStorage.getItem('capsule_token');
+            
+            try {
+                const response = await fetch(`/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                // Reload the user list
+                document.getElementById('user-list').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                loadUsers();
+            } catch (error) {
+                showError(`Failed to delete user: ${error.message}`);
+            }
+        }
+        
+        function showError(message) {
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error-message');
+            
+            loading.style.display = 'none';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        // Load users on page load
+        loadUsers();
+    </script>
+</body>
+</html>

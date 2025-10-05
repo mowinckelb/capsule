@@ -1,6 +1,5 @@
 /**
- * Capsule Web Interface JavaScript
- * Handles all frontend interactions with the API
+ * capsule web interface
  */
 
 class CapsuleApp {
@@ -8,61 +7,219 @@ class CapsuleApp {
         this.token = localStorage.getItem('capsule_token');
         this.user_id = localStorage.getItem('capsule_user_id');
         this.api_base = window.location.origin;
-        
-        // Initialize app
+        this.mode = 'input';
+        this.authMode = 'login';
+        this.isProcessing = false;
+
         this.init();
     }
     
     init() {
-        console.log('🚀 Initializing Capsule App');
-        
-        // Check if user is already logged in
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initAfterDOM());
+        } else {
+            this.initAfterDOM();
+        }
+    }
+    
+    initAfterDOM() {
         if (this.token && this.user_id) {
             this.showApp();
         } else {
             this.showAuth();
         }
         
-        // Add keyboard shortcuts
         this.setupKeyboardShortcuts();
     }
     
     setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + Enter to submit forms
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                const activeElement = document.activeElement;
-                if (activeElement.id === 'memory-input') {
-                    this.addMemory();
-                } else if (activeElement.id === 'query-input') {
-                    this.queryMemories();
+        // Auth screen navigation
+        const authUsername = document.getElementById('auth-username');
+        const authPassword = document.getElementById('auth-password');
+        
+        if (authUsername) {
+            authUsername.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    authPassword.focus();
                 }
-            }
-        });
+            });
+        }
+        
+        if (authPassword) {
+            authPassword.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleAuth();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.switchAuthMode(this.authMode === 'login' ? 'register' : 'login');
+                }
+            });
+        }
+        
+        if (authUsername) {
+            authUsername.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.switchAuthMode(this.authMode === 'login' ? 'register' : 'login');
+                }
+            });
+        }
+        
+        // Main input
+        const mainInput = document.getElementById('main-input');
+        if (mainInput) {
+            mainInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleSubmit();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    // Toggle mode without changing focus
+                    if (this.mode === 'input') {
+                        this.setMode('output');
+                    } else {
+                        this.setMode('input');
+                    }
+                }
+            });
+        }
+        
+        // Toggle container navigation
+        const toggleContainer = document.getElementById('toggle-container');
+        if (toggleContainer) {
+            toggleContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.setMode('input');
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.setMode('output');
+                } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (mainInput) mainInput.focus();
+                }
+            });
+        }
     }
     
     showAuth() {
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('app-section').classList.add('hidden');
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        if (authScreen) authScreen.classList.remove('hidden');
+        if (appScreen) appScreen.classList.add('hidden');
+        
+        // Auto-focus username field
+        setTimeout(() => {
+            const authUsername = document.getElementById('auth-username');
+            if (authUsername) authUsername.focus();
+        }, 100);
     }
     
     showApp() {
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('app-section').classList.remove('hidden');
-        document.getElementById('user-name').textContent = this.user_id;
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const userName = document.getElementById('user-name');
+        
+        if (authScreen) authScreen.classList.add('hidden');
+        if (appScreen) appScreen.classList.remove('hidden');
+        if (userName) userName.textContent = this.user_id;
+        
+        // Load provider info
+        this.loadProviders();
+        
+        setTimeout(() => {
+            const mainInput = document.getElementById('main-input');
+            if (mainInput) mainInput.focus();
+        }, 100);
     }
     
-    showMessage(elementId, message, type = 'info') {
-        const element = document.getElementById(elementId);
-        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
-        element.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
-        
-        // Auto-hide success messages after 3 seconds
-        if (type !== 'error') {
-            setTimeout(() => {
-                element.innerHTML = '';
-            }, 3000);
+    async loadProviders() {
+        try {
+            // Use fetch directly since /providers is a public endpoint
+            const response = await fetch(`${this.api_base}/providers`);
+            const data = await response.json();
+            const llmProvider = document.getElementById('llm-provider');
+            const storageProvider = document.getElementById('storage-provider');
+            if (llmProvider) llmProvider.textContent = data.llm;
+            if (storageProvider) storageProvider.textContent = data.storage;
+        } catch (error) {
+            console.error('Failed to load providers:', error);
+            // Set fallback values
+            const llmProvider = document.getElementById('llm-provider');
+            const storageProvider = document.getElementById('storage-provider');
+            if (llmProvider) llmProvider.textContent = 'unknown';
+            if (storageProvider) storageProvider.textContent = 'unknown';
         }
+    }
+    
+    switchAuthMode(mode) {
+        this.authMode = mode;
+        const slider = document.getElementById('auth-slider');
+        const submitBtn = document.getElementById('auth-submit-btn');
+        const loginToggle = document.getElementById('login-toggle');
+        const registerToggle = document.getElementById('register-toggle');
+        
+        if (mode === 'register') {
+            if (slider) slider.classList.add('register');
+            if (submitBtn) submitBtn.textContent = 'sign up';
+            if (loginToggle) loginToggle.classList.remove('active');
+            if (registerToggle) registerToggle.classList.add('active');
+        } else {
+            if (slider) slider.classList.remove('register');
+            if (submitBtn) submitBtn.textContent = 'sign in';
+            if (loginToggle) loginToggle.classList.add('active');
+            if (registerToggle) registerToggle.classList.remove('active');
+        }
+    }
+    
+    setMode(mode) {
+        this.mode = mode;
+        const slider = document.getElementById('mode-slider');
+        const inputBtn = document.getElementById('input-mode-btn');
+        const outputBtn = document.getElementById('output-mode-btn');
+        
+        if (mode === 'output') {
+            if (slider) slider.classList.add('output');
+            if (inputBtn) inputBtn.classList.remove('active');
+            if (outputBtn) outputBtn.classList.add('active');
+        } else {
+            if (slider) slider.classList.remove('output');
+            if (inputBtn) inputBtn.classList.add('active');
+            if (outputBtn) outputBtn.classList.remove('active');
+        }
+        
+        const mainInput = document.getElementById('main-input');
+        if (mainInput) mainInput.focus();
+    }
+    
+    showStatus(message, isThinking = false) {
+        const statusEl = document.getElementById('status-message');
+        if (!statusEl) return;
+        
+        if (isThinking) {
+            statusEl.innerHTML = '<span class="thinking">thinking</span>';
+        } else {
+            statusEl.textContent = message;
+        }
+    }
+    
+    clearStatus() {
+        setTimeout(() => {
+            const statusEl = document.getElementById('status-message');
+            if (statusEl) statusEl.textContent = '';
+        }, 2000);
+    }
+    
+    showOutput(text) {
+        const outputEl = document.getElementById('output-content');
+        if (outputEl) outputEl.textContent = text;
+    }
+    
+    clearOutput() {
+        const outputEl = document.getElementById('output-content');
+        if (outputEl) outputEl.textContent = '';
     }
     
     async makeRequest(endpoint, options = {}) {
@@ -73,12 +230,10 @@ class CapsuleApp {
             }
         };
         
-        // Add auth token if available
         if (this.token) {
             defaultOptions.headers['Authorization'] = `Bearer ${this.token}`;
         }
         
-        // Handle form data
         if (options.body instanceof FormData) {
             delete defaultOptions.headers['Content-Type'];
         }
@@ -86,86 +241,75 @@ class CapsuleApp {
         const finalOptions = { ...defaultOptions, ...options };
         
         try {
-            console.log(`📡 Making request to ${endpoint}`);
             const response = await fetch(url, finalOptions);
             
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-                throw new Error(errorData.detail || `HTTP ${response.status}`);
+                const errorData = await response.json().catch(() => ({ detail: 'unknown error' }));
+                throw new Error((errorData.detail || `http ${response.status}`).toLowerCase());
             }
             
             return await response.json();
         } catch (error) {
-            console.error(`❌ Request failed:`, error);
             throw error;
         }
     }
     
-    async register() {
-        const user_id = document.getElementById('register-user').value.trim();
-        const password = document.getElementById('register-password').value;
+    async handleAuth() {
+        const username = document.getElementById('auth-username');
+        const password = document.getElementById('auth-password');
+        const messageEl = document.getElementById('auth-message');
         
-        if (!user_id || !password) {
-            this.showMessage('auth-message', 'Please fill in all fields', 'error');
+        if (!username || !password) return;
+        
+        const user_id = username.value.trim().toLowerCase();
+        const pass = password.value;
+        
+        if (!user_id || !pass) {
+            if (messageEl) messageEl.textContent = 'please fill in all fields';
             return;
         }
         
         try {
-            const formData = new FormData();
-            formData.append('user_id', user_id);
-            formData.append('password', password);
-            
-            const result = await this.makeRequest('/register', {
-                method: 'POST',
-                body: formData
-            });
-            
-            this.showMessage('auth-message', 'Registration successful! You can now login.', 'success');
-            
-            // Switch to login tab and pre-fill user ID
-            this.switchTab('login');
-            document.getElementById('login-user').value = user_id;
-            
+            if (this.authMode === 'register') {
+                await this.register(user_id, pass);
+            } else {
+                await this.login(user_id, pass);
+            }
         } catch (error) {
-            this.showMessage('auth-message', `Registration failed: ${error.message}`, 'error');
+            if (messageEl) messageEl.textContent = `error: ${error.message}`;
         }
     }
     
-    async login() {
-        const user_id = document.getElementById('login-user').value.trim();
-        const password = document.getElementById('login-password').value;
+    async register(user_id, password) {
+        const formData = new FormData();
+        formData.append('user_id', user_id);
+        formData.append('password', password);
         
-        if (!user_id || !password) {
-            this.showMessage('auth-message', 'Please fill in all fields', 'error');
-            return;
-        }
+        await this.makeRequest('/register', {
+            method: 'POST',
+            body: formData
+        });
         
-        try {
-            const formData = new FormData();
-            formData.append('username', user_id);
-            formData.append('password', password);
-            
-            const result = await this.makeRequest('/login', {
-                method: 'POST',
-                body: formData
-            });
-            
-            // Store token and user info
-            this.token = result.access_token;
-            this.user_id = user_id;
-            localStorage.setItem('capsule_token', this.token);
-            localStorage.setItem('capsule_user_id', this.user_id);
-            
-            this.showMessage('auth-message', 'Login successful!', 'success');
-            
-            // Show main app after brief delay
-            setTimeout(() => {
-                this.showApp();
-            }, 1000);
-            
-        } catch (error) {
-            this.showMessage('auth-message', `Login failed: ${error.message}`, 'error');
-        }
+        // Auto-login after registration
+        await this.login(user_id, password);
+    }
+    
+    async login(user_id, password) {
+        const formData = new FormData();
+        formData.append('username', user_id);
+        formData.append('password', password);
+        
+        const result = await this.makeRequest('/login', {
+            method: 'POST',
+            body: formData
+        });
+        
+        this.token = result.access_token;
+        this.user_id = user_id;
+        localStorage.setItem('capsule_token', this.token);
+        localStorage.setItem('capsule_user_id', this.user_id);
+        
+        this.showApp();
     }
     
     logout() {
@@ -174,158 +318,142 @@ class CapsuleApp {
         localStorage.removeItem('capsule_token');
         localStorage.removeItem('capsule_user_id');
         
-        // Clear forms
-        document.getElementById('login-user').value = '';
-        document.getElementById('login-password').value = '';
-        document.getElementById('memory-input').value = '';
-        document.getElementById('query-input').value = '';
+        const authUsername = document.getElementById('auth-username');
+        const authPassword = document.getElementById('auth-password');
+        const authMessage = document.getElementById('auth-message');
+        const mainInput = document.getElementById('main-input');
         
+        if (authUsername) authUsername.value = '';
+        if (authPassword) authPassword.value = '';
+        if (authMessage) authMessage.textContent = '';
+        if (mainInput) mainInput.value = '';
+        
+        this.clearOutput();
         this.showAuth();
     }
     
-    async addMemory() {
-        const memory = document.getElementById('memory-input').value.trim();
-        
-        if (!memory) {
-            this.showMessage('add-message', 'Please enter a memory to save', 'error');
+    async handleSubmit() {
+        const input = document.getElementById('main-input');
+        if (!input) return;
+
+        const text = input.value.trim();
+        if (!text) return;
+
+        // Prevent double submission
+        if (this.isProcessing) {
+            this.shakeInput(input);
             return;
         }
-        
+
+        input.value = '';
+        this.isProcessing = true;
+
         try {
-            this.showMessage('add-message', '💾 Saving memory...', 'info');
+            if (this.mode === 'input') {
+                await this.addMemory(text);
+            } else {
+                await this.queryMemories(text);
+            }
+        } finally {
+            this.isProcessing = false;
+            // Only refocus on desktop to avoid triggering mobile keyboard
+            if (window.innerWidth > 768) {
+                input.focus();
+            }
+        }
+    }
+
+    shakeInput(input) {
+        input.classList.add('shake');
+        setTimeout(() => input.classList.remove('shake'), 500);
+    }
+    
+    async addMemory(memory) {
+        try {
+            this.clearOutput();
+
+            // Delay thinking indicator slightly
+            setTimeout(() => {
+                this.showStatus('', true);
+            }, 500);
+
+            // Add timestamp context for temporal understanding
+            const now = new Date();
+            const timestamp = now.toISOString();
+            const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Only include the date, not the specific time (to avoid false time assumptions)
+            const contextualMemory = `[${timestamp}] [${dayOfWeek}, ${dateStr}] ${memory}`;
             
             const formData = new FormData();
-            formData.append('memory', memory);
+            formData.append('memory', contextualMemory);
             
-            const result = await this.makeRequest('/add', {
+            await this.makeRequest('/add', {
                 method: 'POST',
                 body: formData
             });
             
-            this.showMessage('add-message', '✅ Memory saved successfully!', 'success');
-            document.getElementById('memory-input').value = '';
-            
+            this.showStatus('memory saved.');
+            this.clearStatus();
         } catch (error) {
-            this.showMessage('add-message', `Failed to save memory: ${error.message}`, 'error');
+            this.showStatus(`error: ${error.message}`);
+            this.clearStatus();
         }
     }
     
-    async queryMemories() {
-        const query = document.getElementById('query-input').value.trim();
-        
-        if (!query) {
-            this.showMessage('query-results', '<div class="alert alert-error">Please enter a question</div>');
-            return;
-        }
-        
+    async queryMemories(query) {
         try {
-            // Show loading state
-            document.getElementById('query-results').innerHTML = 
-                '<div class="loading">🔍 Searching your memories...</div>';
-            
+            this.clearOutput();
+
+            // Delay thinking indicator slightly
+            setTimeout(() => {
+                this.showStatus('', true);
+            }, 500);
+
             const result = await this.makeRequest(`/query?q=${encodeURIComponent(query)}`);
             
-            // Display results
-            this.displayQueryResults(result.results, query);
+            this.showStatus('');
             
-            // Clear input
-            document.getElementById('query-input').value = '';
-            
+            if (!result.results || result.results === "No matching memories found.") {
+                this.showOutput("i don't have any memories about that yet.");
+            } else {
+                this.showOutput(result.results);
+            }
         } catch (error) {
-            document.getElementById('query-results').innerHTML = 
-                `<div class="alert alert-error">Search failed: ${error.message}</div>`;
-        }
-    }
-    
-    displayQueryResults(results, query) {
-        const resultsContainer = document.getElementById('query-results');
-        
-        if (!results || results === "No matching memories found.") {
-            resultsContainer.innerHTML = `
-                <div class="memory-result">
-                    <h3>🤔 No Results Found</h3>
-                    <p>I couldn't find any memories related to "${query}". Try asking about something you've saved before, or save some memories first!</p>
-                </div>
-            `;
-            return;
-        }
-        
-        resultsContainer.innerHTML = `
-            <div class="memory-result">
-                <h3>💡 Answer</h3>
-                <p>${this.formatResponse(results)}</p>
-            </div>
-        `;
-    }
-    
-    formatResponse(response) {
-        // Basic formatting for better readability
-        return response
-            .replace(/\n/g, '<br>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>');
-    }
-    
-    switchTab(tab) {
-        // Update tab appearance
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelector(`.tab:nth-child(${tab === 'login' ? '1' : '2'})`).classList.add('active');
-        
-        // Show/hide forms
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        
-        if (tab === 'login') {
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-        } else {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-        }
-        
-        // Clear any previous messages
-        document.getElementById('auth-message').innerHTML = '';
-    }
-    
-    handleQueryKeypress(event) {
-        if (event.key === 'Enter') {
-            this.queryMemories();
+            this.showStatus('');
+            this.showOutput(`error: ${error.message}`);
         }
     }
 }
 
-// Global functions for HTML onclick handlers
+// global functions
 let app;
 
-function switchTab(tab) {
-    app.switchTab(tab);
+function switchAuthMode(mode) {
+    if (!app) { console.error('App not initialized'); return; }
+    app.switchAuthMode(mode);
 }
 
-function register() {
-    app.register();
-}
-
-function login() {
-    app.login();
+function handleAuth() {
+    if (!app) { console.error('App not initialized'); return; }
+    app.handleAuth();
 }
 
 function logout() {
+    if (!app) { console.error('App not initialized'); return; }
     app.logout();
 }
 
-function addMemory() {
-    app.addMemory();
+function setMode(mode) {
+    if (!app) { console.error('App not initialized'); return; }
+    app.setMode(mode);
 }
 
-function queryMemories() {
-    app.queryMemories();
+function handleSubmit() {
+    if (!app) { console.error('App not initialized'); return; }
+    app.handleSubmit();
 }
 
-function handleQueryKeypress(event) {
-    app.handleQueryKeypress(event);
-}
-
-// Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    app = new CapsuleApp();
-});
+// initialize when script loads
+app = new CapsuleApp();

@@ -1,23 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Capsule - Personal Memory System</title>
+    <title>capsule</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #64748b;
-            --success-color: #059669;
-            --error-color: #dc2626;
-            --background: #f8fafc;
-            --surface: #ffffff;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-        
         * {
             margin: 0;
             padding: 0;
@@ -25,286 +12,534 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            background: #fafafa;
+            color: #1a1a1a;
             line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
         }
         
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+        
+        .auth-screen {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 2rem;
+            position: relative;
         }
         
-        .header {
+        .auth-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
             text-align: center;
-            margin-bottom: 3rem;
+            font-size: 0.85rem;
+            opacity: 0.55;
+            z-index: 100;
+            background: #fafafa;
         }
         
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
+        @media (max-width: 768px) {
+            .auth-header {
+                padding: 1rem;
+            }
         }
         
-        .header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-        
-        .card {
-            background: var(--surface);
+        .auth-toggle {
+            position: relative;
+            background: rgba(0, 0, 0, 0.06);
             border-radius: 12px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            margin-bottom: 2rem;
-        }
-        
-        .form-group {
+            padding: 2px;
+            display: inline-flex;
             margin-bottom: 1.5rem;
         }
         
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-        
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-        
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
+        .auth-toggle-btn {
+            position: relative;
+            background: transparent;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
+            padding: 4px 16px;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 0.85rem;
+            color: #666;
             cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
+            transition: color 0.3s ease;
+            z-index: 2;
         }
         
-        .btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
+        .auth-toggle-btn.active {
+            color: #1a1a1a;
         }
         
-        .btn-secondary {
-            background: var(--secondary-color);
+        .auth-toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: calc(50% - 2px);
+            height: calc(100% - 4px);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
         }
         
-        .btn-secondary:hover {
-            background: #475569;
+        .auth-toggle-slider.register {
+            transform: translateX(100%);
         }
         
-        .btn-full {
+        .auth-form {
             width: 100%;
+            max-width: 360px;
         }
         
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-weight: 500;
+        .auth-input-wrapper {
+            position: relative;
+            margin-bottom: 12px;
         }
         
-        .alert-success {
-            background: #d1fae5;
-            color: var(--success-color);
-            border: 1px solid #a7f3d0;
+        .input-bubble {
+            background: #f0f0f0;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 18px;
+            padding-right: 50px;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            width: 100%;
+            outline: none;
+            transition: background 0.2s ease;
+            caret-color: #1a1a1a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
         
-        .alert-error {
-            background: #fee2e2;
-            color: var(--error-color);
-            border: 1px solid #fecaca;
+        .input-bubble.no-arrow {
+            padding-right: 18px;
+            margin-bottom: 12px;
         }
         
-        .memory-result {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow);
+        .input-bubble::placeholder {
+            color: #999;
         }
         
-        .memory-result h3 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
+        .input-bubble:focus {
+            background: #e8e8e8;
         }
         
-        .memory-result p {
-            color: var(--text);
-            line-height: 1.6;
+        @supports (caret-width: 2px) {
+            .input-bubble {
+                caret-width: 2px;
+            }
         }
         
-        .loading {
-            text-align: center;
-            color: var(--text-muted);
-            font-style: italic;
+        .input-bubble {
+            caret-color: rgba(26, 26, 26, 0.4);
         }
         
-        .hidden {
-            display: none;
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
         }
         
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
+        .shake {
+            animation: shake 0.2s ease-in-out;
         }
         
-        .status-online {
-            background: var(--success-color);
-        }
-        
-        .status-offline {
-            background: var(--error-color);
-        }
-        
-        .tab-container {
-            margin-bottom: 2rem;
-        }
-        
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid var(--border);
-            margin-bottom: 1rem;
-        }
-        
-        .tab {
-            padding: 0.75rem 1.5rem;
+        .auth-submit-arrow {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%) scaleY(0.8);
+            background: none;
+            border: none;
+            border-radius: 6px;
+            color: #ccc;
+            font-size: 1rem;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-            font-weight: 500;
+            padding: 4px 8px;
+            transition: color 0.2s ease, box-shadow 0.2s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        .tab.active {
-            border-bottom-color: var(--primary-color);
-            color: var(--primary-color);
+        .auth-submit-arrow:hover {
+            color: #999;
         }
         
-        .tab:hover:not(.active) {
-            background: var(--background);
+        .auth-submit-arrow:focus {
+            color: #999;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
         }
         
-        @media (max-width: 640px) {
-            .container {
+        .auth-submit-arrow:active {
+            outline: none;
+        }
+
+        
+        .auth-message {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+        
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            opacity: 0.55;
+            font-size: 0.85rem;
+            z-index: 100;
+            background: #fafafa;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-right {
+            display: none;
+            align-items: center;
+        }
+        
+        .header-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .header-divider {
+            color: #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
                 padding: 1rem;
             }
             
-            .header h1 {
-                font-size: 2rem;
+            .header-left {
+                gap: 0;
             }
             
-            .card {
-                padding: 1.5rem;
+            .header-left .header-divider {
+                display: none;
             }
+            
+            .header-left .header-item {
+                display: none;
+            }
+            
+            .header-right {
+                display: flex;
+            }
+            
+            .header-right .header-item {
+                display: block;
+            }
+        }
+        
+        .header-item {
+            background: none;
+            border: none;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 0.85rem;
+            color: #1a1a1a;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .header-item:hover {
+            opacity: 0.7;
+        }
+        
+        .output-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            padding-top: 5rem;
+            overflow-y: auto;
+        }
+        
+        .output-content {
+            max-width: 600px;
+            font-size: 1.2rem;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+            color: #2a2a2a;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .input-area {
+            padding: 1.5rem;
+            padding-bottom: 2rem;
+        }
+        
+        .mode-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0 20px;
+        }
+        
+        .toggle-container {
+            position: relative;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 2px;
+            display: inline-flex;
+            outline: none;
+        }
+        
+        .toggle-container:focus {
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toggle-btn {
+            position: relative;
+            background: transparent;
+            border: none;
+            padding: 4px 16px;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 0.85rem;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 2;
+            outline: none;
+        }
+        
+        .toggle-btn.active {
+            color: #1a1a1a;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: calc(50% - 2px);
+            height: calc(100% - 4px);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        
+        .toggle-slider.output {
+            transform: translateX(100%);
+        }
+        
+        .provider-info {
+            font-size: 0.75rem;
+            color: #999;
+            opacity: 0.8;
+        }
+        
+        .input-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .input-container {
+            position: relative;
+        }
+        
+        .input-box {
+            width: 100%;
+            background: #f4f4f4;
+            border: none;
+            border-radius: 16px;
+            color: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, Garamond, 'Hoefler Text', 'Times New Roman', serif;
+            font-size: 1.1rem;
+            padding: 16px 20px;
+            padding-right: 60px;
+            outline: none;
+            transition: background 0.2s ease;
+            caret-color: #1a1a1a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        @supports (caret-width: 2px) {
+            .input-box {
+                caret-width: 2px;
+            }
+        }
+        
+        .input-box {
+            caret-color: rgba(26, 26, 26, 0.4);
+        }
+        
+        .input-box:focus {
+            background: #efefef;
+        }
+        
+        .submit-arrow {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%) scaleY(0.8);
+            background: none;
+            border: none;
+            border-radius: 6px;
+            color: #ccc;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: color 0.2s ease, box-shadow 0.2s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .submit-arrow:hover {
+            color: #999;
+        }
+        
+        .submit-arrow:focus {
+            color: #999;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .submit-arrow:active {
+            outline: none;
+        }
+        
+        .status-message {
+            font-size: 0.75rem;
+            margin-top: 0.75rem;
+            text-align: left;
+            padding-left: 20px;
+            height: 1rem;
+            color: #999;
+        }
+        
+        .thinking {
+            display: inline-block;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-header">capsule</div>
+        
+        <div class="auth-toggle">
+            <button class="auth-toggle-btn active" id="login-toggle" onclick="switchAuthMode('login')">sign in</button>
+            <button class="auth-toggle-btn" id="register-toggle" onclick="switchAuthMode('register')">sign up</button>
+            <div class="auth-toggle-slider" id="auth-slider"></div>
+        </div>
+        
+        <div class="auth-form">
+            <input type="text" id="auth-username" class="input-bubble no-arrow" placeholder="" autocomplete="off" spellcheck="false">
+            <div class="auth-input-wrapper">
+                <input type="password" id="auth-password" class="input-bubble" placeholder="" autocomplete="off" spellcheck="false">
+                <button class="auth-submit-arrow" onclick="handleAuth()" tabindex="0">→</button>
+            </div>
+        </div>
+        
+        <div id="auth-message" class="auth-message"></div>
+    </div>
+    
+    <div id="app-screen" class="app-container hidden">
         <div class="header">
-            <h1>🧠 Capsule</h1>
-            <p>Your Personal Memory System</p>
+            <div class="header-left">
+                <span id="user-name"></span>
+                <span class="header-divider">·</span>
+                <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
+            </div>
+            <div class="header-center">
+                <span>capsule</span>
+            </div>
+            <div class="header-right">
+                <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
+            </div>
         </div>
-
-        <!-- Authentication Section -->
-        <div id="auth-section" class="card">
-            <h2>Welcome to Capsule</h2>
-            <p>Please login or register to access your personal memory system.</p>
-            
-            <div class="tab-container">
-                <div class="tabs">
-                    <div class="tab active" onclick="switchTab('login')">Login</div>
-                    <div class="tab" onclick="switchTab('register')">Register</div>
-                </div>
-            </div>
-
-            <!-- Login Form -->
-            <div id="login-form">
-                <div class="form-group">
-                    <label for="login-user">User ID</label>
-                    <input type="text" id="login-user" placeholder="Enter your user ID">
-                </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" placeholder="Enter your password">
-                </div>
-                <button class="btn btn-full" onclick="login()">Login</button>
-            </div>
-
-            <!-- Register Form -->
-            <div id="register-form" class="hidden">
-                <div class="form-group">
-                    <label for="register-user">User ID</label>
-                    <input type="text" id="register-user" placeholder="Choose a user ID">
-                </div>
-                <div class="form-group">
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" placeholder="Choose a password">
-                </div>
-                <button class="btn btn-full" onclick="register()">Register</button>
-            </div>
-
-            <div id="auth-message"></div>
+        
+        <div class="output-area">
+            <div id="output-content" class="output-content"></div>
         </div>
-
-        <!-- Main Application -->
-        <div id="app-section" class="hidden">
-            <div class="card">
-                <h2>Welcome back, <span id="user-name"></span>! 
-                    <span class="status-indicator status-online"></span>
-                    <small style="color: var(--text-muted);">Online</small>
-                </h2>
-                <p>Add memories and ask questions about what you've stored.</p>
-                <button class="btn btn-secondary" onclick="logout()" style="float: right;">Logout</button>
-                <div style="clear: both;"></div>
-            </div>
-
-            <!-- Add Memory -->
-            <div class="card">
-                <h3>💭 Add Memory</h3>
-                <div class="form-group">
-                    <label for="memory-input">What would you like to remember?</label>
-                    <textarea id="memory-input" rows="4" placeholder="I went to a great restaurant today..."></textarea>
+        
+        <div class="input-area">
+            <div class="input-wrapper">
+                <div class="mode-toggle">
+                    <div class="toggle-container" id="toggle-container" tabindex="0">
+                        <button class="toggle-btn active" id="input-mode-btn" onclick="setMode('input')" tabindex="-1">input</button>
+                        <button class="toggle-btn" id="output-mode-btn" onclick="setMode('output')" tabindex="-1">output</button>
+                        <div class="toggle-slider" id="mode-slider"></div>
+                    </div>
+                    
+                    <div class="provider-info" id="provider-info">
+                        <span id="llm-provider">loading...</span> | <span id="storage-provider">loading...</span>
+                    </div>
                 </div>
-                <button class="btn btn-full" onclick="addMemory()">Save Memory</button>
-                <div id="add-message"></div>
-            </div>
-
-            <!-- Query Memories -->
-            <div class="card">
-                <h3>🔍 Ask Questions</h3>
-                <div class="form-group">
-                    <label for="query-input">What would you like to know?</label>
-                    <input type="text" id="query-input" placeholder="What restaurants have I been to?" onkeypress="handleQueryKeypress(event)">
+                
+                <div class="input-container">
+                    <input type="text" id="main-input" class="input-box" autocomplete="off" tabindex="0" spellcheck="false">
+                    <button class="submit-arrow" onclick="handleSubmit()" tabindex="0">→</button>
                 </div>
-                <button class="btn btn-full" onclick="queryMemories()">Search Memories</button>
-                <div id="query-results"></div>
+                <div id="status-message" class="status-message"></div>
             </div>
         </div>
     </div>

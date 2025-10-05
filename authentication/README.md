@@ -1,5 +1,8 @@
 # Authentication Module
 
+## Executive Summary
+**What**: User authentication with Argon2 password hashing and token-based auth. **Why**: Secure user sessions and data isolation. **Agent Instructions**: Never log passwords, use temp databases for tests, ensure argon2-cffi is installed.
+
 This is a **self-contained authentication module** that can be developed and tested independently.
 
 ## 📁 Structure
