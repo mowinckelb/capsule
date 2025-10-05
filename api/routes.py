@@ -42,7 +42,7 @@ class APIRoutes:
             """Root endpoint - Serve the web interface"""
             try:
                 # Get the frontend HTML file
-                frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "interface.html"
+                frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "portfolio_landing.html"
                 if frontend_path.exists():
                     return frontend_path.read_text(encoding='utf-8')
                 else:
@@ -61,6 +61,20 @@ class APIRoutes:
                 <p>API is running at <a href="/docs">/docs</a></p>
                 </body></html>
                 """
+        @self.app.get("/capsule", response_class=HTMLResponse)
+        async def capsule_interface():
+            """Capsule signin/interface page"""
+            try:
+                # Get the Capsule interface  
+                frontend_path = Path(__file__).parent.parent / "frontend" / "components" / "interface.html"
+                if frontend_path.exists():
+                    return frontend_path.read_text(encoding='utf-8')
+                else:
+                    return "<h1>Capsule interface not found</h1>"
+            except Exception as e:
+                return f"<h1>Error loading Capsule interface: {e}</h1>"
+
+
 
         @self.app.get("/admin", response_class=HTMLResponse)
         async def admin_page():
@@ -490,3 +504,4 @@ class APIRoutes:
 
 # Create the main API instance
 api_routes = APIRoutes()
+
