@@ -44,7 +44,7 @@ LLM_PROVIDERS = {
 DATABASE_PROVIDERS = {
     'pinecone': {
         'api_key_env': 'PINECONE_API_KEY',
-        'index_name': os.getenv('PINECONE_INDEX_NAME', 'capsule-data'),
+        'index_name': os.getenv('PINECONE_INDEX_NAME', 'capsule-main'),
         'dimension': int(os.getenv('PINECONE_DIMENSION', '384')),
         'metric': os.getenv('PINECONE_METRIC', 'cosine'),
         'cloud': os.getenv('PINECONE_CLOUD', 'aws'),
