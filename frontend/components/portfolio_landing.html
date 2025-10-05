@@ -48,48 +48,58 @@
         }
         
         .projects {
-            display: grid;
-            gap: 1.5rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
             margin-bottom: 3rem;
         }
         
-        .project-card {
-            background: #fff;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 12px;
-            padding: 2rem;
+        .project-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
             text-decoration: none;
             color: inherit;
-            transition: all 0.3s ease;
-            display: block;
         }
         
-        .project-card:hover {
-            border-color: rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        .project-item:last-child {
+            border-bottom: none;
         }
         
-        .project-title {
-            font-size: 1.5rem;
-            font-weight: 400;
-            margin-bottom: 0.5rem;
+        .project-item:hover {
+            background: #fafafa;
+        }
+        
+        .project-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .project-name {
+            font-size: 1rem;
             color: #1a1a1a;
         }
         
-        .project-description {
-            font-size: 0.95rem;
-            color: #666;
-            line-height: 1.7;
+        .project-divider {
+            color: #ccc;
         }
         
         .project-status {
-            display: inline-block;
-            margin-top: 1rem;
-            padding: 0.25rem 0.75rem;
-            background: rgba(0, 0, 0, 0.04);
-            border-radius: 4px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .project-status.active {
+            color: #1a1a1a;
+        }
+        
+        .project-owner {
+            font-size: 0.85rem;
             color: #666;
         }
         
@@ -124,16 +134,50 @@
         </div>
         
         <div class="projects">
-            <a href="/capsule" class="project-card">
-                <div class="project-title">capsule</div>
-                <div class="project-description">
-                    a personal memory system powered by ai. store your thoughts and memories naturally, 
-                    retrieve them through intelligent queries. your second brain.
+            <a href="/capsule" class="project-item">
+                <div class="project-info">
+                    <span class="project-name">capsule</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status active">active</span>
                 </div>
-                <span class="project-status">live</span>
+                <span class="project-owner">benjamin</span>
             </a>
             
-            <!-- Add more projects here as they come -->
+            <div class="project-item">
+                <div class="project-info">
+                    <span class="project-name">mowinckels</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status">inactive</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </div>
+            
+            <div class="project-item">
+                <div class="project-info">
+                    <span class="project-name">axioms</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status">inactive</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </div>
+            
+            <div class="project-item">
+                <div class="project-info">
+                    <span class="project-name">priors</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status">inactive</span>
+                </div>
+                <span class="project-owner">benjamin</span>
+            </div>
+            
+            <div class="project-item">
+                <div class="project-info">
+                    <span class="project-name">seida</span>
+                    <span class="project-divider">·</span>
+                    <span class="project-status">inactive</span>
+                </div>
+                <span class="project-owner">edward</span>
+            </div>
         </div>
         
         <div class="footer">
