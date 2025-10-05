@@ -4,8 +4,12 @@ import logging
 from datetime import datetime
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
 from config.providers import DATABASE_PROVIDERS as DB_PROVIDERS, DEFAULT_DATABASE_PROVIDER as DEFAULT_DB_PROVIDER
+
+# Only import if not using Pinecone inference
+USE_LOCAL_EMBEDDINGS = os.getenv('USE_LOCAL_EMBEDDINGS', 'false').lower() == 'true'
+if USE_LOCAL_EMBEDDINGS:
+    from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -28,15 +32,32 @@ class DBHandler:
             self.metric = provider_config['metric']
             self.spec = ServerlessSpec(cloud=provider_config['cloud'], region=provider_config['region'])
             self._index = None
+            self.use_inference = not USE_LOCAL_EMBEDDINGS
         else:
             # TODO: Add new provider setup here, e.g., elif provider == 'chroma': self.client = chromadb.Client(provider_config['path'])
             raise NotImplementedError(f"Provider '{provider}' not implemented yet—add in __init__ using provider_config")
 
     @property
     def model(self):
+        if not USE_LOCAL_EMBEDDINGS:
+            return None
         if DBHandler._model is None:
             DBHandler._model = SentenceTransformer('all-MiniLM-L6-v2')
         return DBHandler._model
+    
+    def _embed_text(self, text: str):
+        """Generate embeddings using Pinecone inference or local model"""
+        if self.use_inference:
+            # Use Pinecone's inference API - no local model needed
+            embeddings = self.pc.inference.embed(
+                model="multilingual-e5-large",
+                inputs=[text],
+                parameters={"input_type": "passage"}
+            )
+            return embeddings[0]['values']
+        else:
+            # Use local SentenceTransformer
+            return self.model.encode(text).tolist()
 
     def get_index(self):
         if self.provider == 'pinecone':
@@ -58,7 +79,7 @@ class DBHandler:
                 content = str(memory.get('content', memory.get('summary', '')))
                 if not content:
                     content = ' '
-                vector = self.model.encode(content).tolist()
+                vector = self._embed_text(content)
                 metadata = {
                     'memory': content,
                     'summary': memory.get('summary', ''),
@@ -67,7 +88,7 @@ class DBHandler:
                 }
             else:
                 content = str(memory) if memory else ' '
-                vector = self.model.encode(content).tolist()
+                vector = self._embed_text(content)
                 metadata = {
                     "memory": content,
                     "timestamp": timestamp
@@ -88,7 +109,7 @@ class DBHandler:
             if not text_content:
                 text_content = ' '
             
-            query_vector = self.model.encode(text_content).tolist()
+            query_vector = self._embed_text(text_content)
             results = index.query(vector=query_vector, top_k=top_k, include_metadata=True, namespace=user_id)
             if not results or not hasattr(results, 'matches') or not results.matches:
                 return []

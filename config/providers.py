@@ -45,7 +45,7 @@ DATABASE_PROVIDERS = {
     'pinecone': {
         'api_key_env': 'PINECONE_API_KEY',
         'index_name': os.getenv('PINECONE_INDEX_NAME', 'capsule-main'),
-        'dimension': int(os.getenv('PINECONE_DIMENSION', '384')),
+        'dimension': int(os.getenv('PINECONE_DIMENSION', '1024')),
         'metric': os.getenv('PINECONE_METRIC', 'cosine'),
         'cloud': os.getenv('PINECONE_CLOUD', 'aws'),
         'region': os.getenv('PINECONE_REGION', 'us-east-1'),
