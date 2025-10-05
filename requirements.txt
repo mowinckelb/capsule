@@ -18,7 +18,7 @@ python-multipart==0.0.12
 
 # Vector database
 pinecone[grpc]==5.4.1
-pinecone-plugin-inference==1.1.0
+pinecone-plugin-inference>=2.0.0
 sentence-transformers==3.1.1
 
 # PostgreSQL database (using psycopg instead of psycopg2 for Python 3.13 compatibility)
