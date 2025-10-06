@@ -13,7 +13,7 @@ class LLMHandler:
         if provider not in PROVIDERS:
             raise ValueError(f"Provider '{provider}' not in PROVIDERS")
         provider_config = PROVIDERS[provider]
-        if provider == 'grok':
+        if provider in ['grok', 'groq']:
             api_key = os.getenv(provider_config['api_key_env'])
             if not api_key:
                 raise ValueError(f"No {provider_config['api_key_env']}")
@@ -34,7 +34,7 @@ class LLMHandler:
         else:
             content = str(input_text)
         
-        if self.provider == 'grok':
+        if self.provider in ['grok', 'groq']:
             # Check if this is a natural language response request (contains "Answer this question")
             if "Answer this question:" in content:
                 # Use a different system prompt for natural language responses
