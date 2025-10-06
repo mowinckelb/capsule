@@ -14,7 +14,7 @@ LLM_PROVIDERS = {
     'groq': {
         'api_key_env': 'GROQ_API_KEY',
         'base_url': 'https://api.groq.com/openai/v1/chat/completions',
-        'model': os.getenv('GROQ_MODEL', 'compound-mini'),
+        'model': os.getenv('GROQ_MODEL', 'groq/compound-mini'),
         'system_prompt': "You are an intermediary for a personal vector database. For storage, refine input into JSON only: {summary: concise str summary, tags: list of 5-10 key phrases for semantic search}. For queries, refine for relevance. User: {user_id}. Handle MCP multi-modal input (text/image via tools). No extras or Markdown.",
         'max_tokens': int(os.getenv('GROQ_MAX_TOKENS', '4000')),
         'temperature': float(os.getenv('GROQ_TEMPERATURE', '0.7')),
