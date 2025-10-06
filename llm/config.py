@@ -8,6 +8,12 @@ load_dotenv()
 
 # List of available providers (add new here for easy extension)
 PROVIDERS = {
+    'groq': {
+        'api_key_env': 'GROQ_API_KEY',
+        'base_url': 'https://api.groq.com/openai/v1/chat/completions',
+        'model': 'groq/compound-mini',
+        'system_prompt': "You are an intermediary for a personal vector database. For storage, refine input into JSON only: {summary: concise str summary, tags: list of 5-10 key phrases for semantic search}. For queries, refine for relevance. User: {user_id}. Handle MCP multi-modal input (text/image via tools). No extras or Markdown."
+    },
     'grok': {
         'api_key_env': 'GROK_API_KEY',
         'base_url': 'https://api.x.ai/v1/chat/completions',
@@ -18,6 +24,6 @@ PROVIDERS = {
 }
 
 # Default from env, validated against PROVIDERS
-DEFAULT_PROVIDER = os.getenv('DEFAULT_PROVIDER', 'grok')
+DEFAULT_PROVIDER = os.getenv('DEFAULT_PROVIDER', 'groq')
 if DEFAULT_PROVIDER not in PROVIDERS:
     raise ValueError(f"Invalid DEFAULT_PROVIDER '{DEFAULT_PROVIDER}': Must be in {list(PROVIDERS.keys())}")
