@@ -11,6 +11,16 @@ load_dotenv()
 
 # LLM Providers configuration
 LLM_PROVIDERS = {
+    'groq': {
+        'api_key_env': 'GROQ_API_KEY',
+        'base_url': 'https://api.groq.com/openai/v1/chat/completions',
+        'model': os.getenv('GROQ_MODEL', 'compound-mini'),
+        'system_prompt': "You are an intermediary for a personal vector database. For storage, refine input into JSON only: {summary: concise str summary, tags: list of 5-10 key phrases for semantic search}. For queries, refine for relevance. User: {user_id}. Handle MCP multi-modal input (text/image via tools). No extras or Markdown.",
+        'max_tokens': int(os.getenv('GROQ_MAX_TOKENS', '4000')),
+        'temperature': float(os.getenv('GROQ_TEMPERATURE', '0.7')),
+        'timeout': int(os.getenv('GROQ_TIMEOUT', '30')),
+        'fallback_provider': 'grok',
+    },
     'grok': {
         'api_key_env': 'GROK_API_KEY',
         'base_url': 'https://api.x.ai/v1/chat/completions',
@@ -67,7 +77,7 @@ DATABASE_PROVIDERS = {
 }
 
 # Default providers
-DEFAULT_LLM_PROVIDER = os.getenv('DEFAULT_LLM_PROVIDER', 'grok')
+DEFAULT_LLM_PROVIDER = os.getenv('DEFAULT_LLM_PROVIDER', 'groq')
 DEFAULT_DATABASE_PROVIDER = os.getenv('DEFAULT_DATABASE_PROVIDER', 'pinecone')
 
 # Validation
