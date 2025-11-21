@@ -60,9 +60,30 @@
             background: #fafafa;
         }
         
+        .auth-header-title {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .auth-header-subtitle {
+            font-size: 0.7rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        
         @media (max-width: 768px) {
             .auth-header {
                 padding: 1rem;
+            }
+            
+            .auth-header-subtitle {
+                font-size: 0.65rem;
+            }
+            
+            .header-subtitle {
+                font-size: 0.65rem;
             }
         }
         
@@ -246,6 +267,16 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .header-subtitle {
+            font-size: 0.7rem;
+            font-style: italic;
+            opacity: 0.8;
         }
         
         .header-divider {
@@ -483,7 +514,12 @@
 </head>
 <body>
     <div id="auth-screen" class="auth-screen">
-        <div class="auth-header">capsule</div>
+        <div class="auth-header">
+            <div class="auth-header-title">
+                <span>capsule</span>
+                <span class="auth-header-subtitle">encapsulate memories</span>
+            </div>
+        </div>
         
         <div class="auth-toggle">
             <button class="auth-toggle-btn active" id="login-toggle" onclick="switchAuthMode('login')">sign in</button>
@@ -511,6 +547,7 @@
             </div>
             <div class="header-center">
                 <span>capsule</span>
+                <span class="header-subtitle">encapsulate memories</span>
             </div>
             <div class="header-right">
                 <button class="header-item" onclick="logout()" tabindex="0">sign out</button>
